@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天巡散货体积监测系统 - 数据管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+            position: relative;
+        }
+        .user-info .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .toolbar {
+            background-color: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .advanced-search-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .advanced-search-panel {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 400px;
+            z-index: 10;
+            margin-top: 5px;
+        }
+        .advanced-search-panel.active {
+            display: block;
+        }
+        .search-group {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .search-group label {
+            width: 100px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .search-group select, .search-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-date {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .data-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .data-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .data-tab {
+            padding: 10px 20px;
+            background-color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 4px 4px 0 0;
+        }
+        .data-tab.active {
+            background-color: white;
+            color: #3498db;
+            border-top: 2px solid #3498db;
+            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .data-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #7f8c8d;
+            position: relative;
+        }
+        .data-table th .sort-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #ccc;
+        }
+        .data-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .file-type {
+            display: flex;
+            align-items: center;
+        }
+        .file-icon {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-processing {
+            background-color: #f39c12;
+            color: white;
+        }
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .status-pending {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        .action-link {
+            color: #3498db;
+            cursor: pointer;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .action-link:hover {
+            text-decoration: underline;
+        }
+        .upload-modal, .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .upload-area {
+            border: 2px dashed #ddd;
+            padding: 30px;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #3498db;
+            background-color: #f9f9f9;
+        }
+        .upload-progress {
+            margin-top: 15px;
+            display: none;
+        }
+        .upload-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .upload-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .batch-upload-option {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .batch-upload-option input {
+            margin-right: 10px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .preview-container {
+            margin-top: 20px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        .pagination-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 0;
+            color: #7f8c8d;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        .data-statistics {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 150px;
+        }
+        .stat-card h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        .trend-up {
+            color: #2ecc71;
+        }
+        .trend-down {
+            color: #e74c3c;
+        }
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .action-buttons {
+                justify-content: flex-end;
+            }
+            .data-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+    <!-- 引入Font Awesome图标库 -->
+    <link rel=
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>天巡散货体积监测系统</h2>
+            <ul>
+                <li><a href="dashboard.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">首页</a></li>
+                <li class="active"><a href="data_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">数据管理</a></li>
+                <li><a href="task_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">任务管理</a></li>
+                <li><a href="3d_visualization_prototype.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">三维展示</a></li>
+                <li><a href="result_analysis.html" style="color: white; text-decoration: none; display: block;">结果分析</a></li>
+                <li><a href="report_management.html" style="color: white; text-decoration: none; display: block;">报告管理</a></li>
+                <li><a href="system_settings.html" style="color: white; text-decoration: none; display: block;">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>数据管理</h1>
+                <div class="user-info">
+                    <span>管理员</span>
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                </div>
+            </div>
+            <div class="toolbar">
+                <input type="text" class="search-box" placeholder="搜索数据...">
+                <button class="btn btn-primary" id="uploadBtn">上传数据</button>
+            </div>
+            <div class="data-content">
+                <div class="data-tabs">
+                    <button class="data-tab active">全部数据</button>
+                    <button class="data-tab">原始数据</button>
+                    <button class="data-tab">处理后数据</button>
+                    <button class="data-tab">结果数据</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>数据ID</th>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>大小</th>
+                            <th>上传时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>D001</td>
+                            <td>龙口煤场点云数据</td>
+                            <td><div class="file-type"><span class="file-icon">📦</span>点云数据</div></td>
+                            <td>2.4 GB</td>
+                            <td>2025-08-15 09:30</td>
+                            <td>已处理</td>
+                            <td>查看 | 下载 | 删除</td>
+                        </tr>
+                        <tr>
+                            <td>D002</td>
+                            <td>秦皇岛煤场影像</td>
+                            <td><div class="file-type"><span class="file-icon">🖼️</span>影像数据</div></td>
+                            <td>1.8 GB</td>
+                            <td>2025-08-16 10:15</td>
+                            <td>已处理</td>
+                            <td>查看 | 下载 | 删除</td>
+                        </tr>
+                        <tr>
+                            <td>D003</td>
+                            <td>天津港三维模型</td>
+                            <td><div class="file-type"><span class="file-icon">🏗️</span>模型数据</div></td>
+                            <td>3.2 GB</td>
+                            <td>2025-08-17 08:45</td>
+                            <td>处理中</td>
+                            <td>查看 | 取消</td>
+                        </tr>
+                        <tr>
+                            <td>D004</td>
+                            <td>黄骅港煤堆测量数据</td>
+                            <td><div class="file-type"><span class="file-icon">📊</span>测量数据</div></td>
+                            <td>568 MB</td>
+                            <td>2025-08-17 13:20</td>
+                            <td>处理中</td>
+                            <td>查看 | 取消</td>
+                        </tr>
+                        <tr>
+                            <td>D005</td>
+                            <td>日照港数据处理结果</td>
+                            <td><div class="file-type"><span class="file-icon">📈</span>结果数据</div></td>
+                            <td>124 MB</td>
+                            <td>2025-08-18 09:00</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除</td>
+                        </tr>
+                        <tr>
+                            <td>D006</td>
+                            <td>青岛港点云数据</td>
+                            <td><div class="file-type"><span class="file-icon">📦</span>点云数据</div></td>
+                            <td>3.7 GB</td>
+                            <td>2025-08-18 14:30</td>
+                            <td>待处理</td>
+                            <td>查看 | 处理 | 删除</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传数据模态框 -->
+    <div class="upload-modal" id="uploadModal">
+        <div class="modal-content">
+            <h2>上传数据</h2>
+            <div class="form-group">
+                <label for="dataName">数据名称</label>
+                <input type="text" id="dataName" class="form-control" placeholder="输入数据名称">
+            </div>
+            <div class="form-group">
+                <label for="dataType">数据类型</label>
+                <select id="dataType" class="form-control">
+                    <option value="point_cloud">点云数据</option>
+                    <option value="image">影像数据</option>
+                    <option value="model">模型数据</option>
+                    <option value="measurement">测量数据</option>
+                    <option value="result">结果数据</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dataDescription">数据描述</label>
+                <textarea id="dataDescription" class="form-control" rows="3" placeholder="输入数据描述"></textarea>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <p>拖拽文件到此处或点击上传</p>
+                <input type="file" id="fileUpload" style="display: none;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelUpload">取消</button>
+                <button class="btn btn-primary" id="confirmUpload">上传</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模态框控制
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadModal = document.getElementById('uploadModal');
+        const cancelUpload = document.getElementById('cancelUpload');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileUpload = document.getElementById('fileUpload');
+        const confirmUpload = document.getElementById('confirmUpload');
+
+        uploadBtn.addEventListener('click', () => {
+            uploadModal.style.display = 'flex';
+        });
+
+        cancelUpload.addEventListener('click', () => {
+            uploadModal.style.display = 'none';
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileUpload.click();
+        });
+
+        fileUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadArea.innerHTML = `<p>已选择文件: ${e.target.files[0].name}</p>`;
+            }
+        });
+
+        confirmUpload.addEventListener('click', () => {
+            alert('数据上传功能将在后续版本实现');
+            uploadModal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        uploadModal.addEventListener('click', (e) => {
+            if (e.target === uploadModal) {
+                uploadModal.style.display = 'none';
+            }
+        });
+
+        // 标签切换
+        document.querySelectorAll('.data-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.data-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

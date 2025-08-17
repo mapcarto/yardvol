@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天巡散货体积监测系统 - 系统设置</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .settings-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .settings-tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            border-radius: 4px 4px 0 0;
+            overflow: hidden;
+        }
+        .settings-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-right: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        .settings-tab:hover {
+            background-color: #f9f9f9;
+        }
+        .settings-tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .settings-panel {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .settings-panel.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .user-table th, .user-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .user-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .user-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3498db;
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #3498db;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .log-levels {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .log-level {
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .log-level.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .log-entries {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .log-time {
+            color: #7f8c8d;
+        }
+        .log-message {
+            margin-top: 5px;
+        }
+        .version-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>天巡散货体积监测系统</h2>
+            <ul>
+                <li><a href="dashboard.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">首页</a></li>
+                <li><a href="data_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">数据管理</a></li>
+                <li><a href="task_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">任务管理</a></li>
+                <li><a href="3d_visualization_prototype.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">三维展示</a></li>
+                <li><a href="result_analysis.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">结果分析</a></li>
+                <li><a href="report_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">报告管理</a></li>
+                <li class="active"><a href="system_settings.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>系统设置</h1>
+                <div class="user-info">
+                    <span>管理员</span>
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                </div>
+            </div>
+            <div class="settings-content">
+                <div class="settings-tabs">
+                    <div class="settings-tab active" data-tab="user-management">用户管理</div>
+                    <div class="settings-tab" data-tab="system-configuration">系统配置</div>
+                    <div class="settings-tab" data-tab="log-management">日志管理</div>
+                    <div class="settings-tab" data-tab="help-about">帮助与关于</div>
+                </div>
+
+                <!-- 用户管理面板 -->
+                <div class="settings-panel active" id="user-management">
+                    <button class="btn btn-primary" id="addUserBtn">添加用户</button>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>用户ID</th>
+                                <th>用户名</th>
+                                <th>角色</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>U001</td>
+                                <td>admin</td>
+                                <td>管理员</td>
+                                <td>启用</td>
+                                <td>2025-08-01</td>
+                                <td>编辑 | 重置密码 | 禁用</td>
+                            </tr>
+                            <tr>
+                                <td>U002</td>
+                                <td>operator1</td>
+                                <td>操作员</td>
+                                <td>启用</td>
+                                <td>2025-08-05</td>
+                                <td>编辑 | 重置密码 | 禁用</td>
+                            </tr>
+                            <tr>
+                                <td>U003</td>
+                                <td>viewer1</td>
+                                <td>查看员</td>
+                                <td>启用</td>
+                                <td>2025-08-10</td>
+                                <td>编辑 | 重置密码 | 禁用</td>
+                            </tr>
+                            <tr>
+                                <td>U004</td>
+                                <td>operator2</td>
+                                <td>操作员</td>
+                                <td>禁用</td>
+                                <td>2025-08-12</td>
+                                <td>编辑 | 重置密码 | 启用</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 系统配置面板 -->
+                <div class="settings-panel" id="system-configuration">
+                    <div class="form-group">
+                        <label for="apiEndpoint">API 端点</label>
+                        <input type="text" id="apiEndpoint" class="form-control" value="http://api.tianxun-system.com/v1">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataStoragePath">数据存储路径</label>
+                        <input type="text" id="dataStoragePath" class="form-control" value="/data/tianxun/storage">
+                    </div>
+                    <div class="form-group">
+                        <label for="defaultCoordinateSystem">默认坐标系</label>
+                        <input type="text" id="defaultCoordinateSystem" class="form-control" value="WGS84">
+                    </div>
+                    <div class="form-group">
+                        <label>自动更新</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>实时数据同步</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary">保存配置</button>
+                </div>
+
+                <!-- 日志管理面板 -->
+                <div class="settings-panel" id="log-management">
+                    <div class="log-levels">
+                        <div class="log-level active">全部</div>
+                        <div class="log-level">信息</div>
+                        <div class="log-level">警告</div>
+                        <div class="log-level">错误</div>
+                        <div class="log-level">调试</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="logDateFrom">开始日期</label>
+                            <input type="date" id="logDateFrom" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="logDateTo">结束日期</label>
+                            <input type="date" id="logDateTo" class="form-control">
+                        </div>
+                    </div>
+                    <div class="log-entries">
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:15:32 [INFO]</div>
+                            <div class="log-message">系统启动成功</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:16:45 [INFO]</div>
+                            <div class="log-message">用户 admin 登录成功</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:20:12 [INFO]</div>
+                            <div class="log-message">数据导入任务开始执行，任务ID: T1001</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:25:30 [ERROR]</div>
+                            <div class="log-message">数据导入任务失败，任务ID: T1001，错误: 文件格式不支持</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:30:05 [INFO]</div>
+                            <div class="log-message">用户 operator1 登录成功</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:35:18 [WARNING]</div>
+                            <div class="log-message">磁盘空间不足，剩余空间: 10%</div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">2025-08-20 10:40:22 [INFO]</div>
+                            <div class="log-message">三维重建任务完成，任务ID: T1002</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary">导出日志</button>
+                        <button class="btn btn-secondary">清除日志</button>
+                    </div>
+                </div>
+
+                <!-- 帮助与关于面板 -->
+                <div class="settings-panel" id="help-about">
+                    <h3>系统帮助</h3>
+                    <p>天巡散货体积监测系统是一套用于户外散货堆场体积测量与监管的综合解决方案。系统通过无人机采集数据，结合三维重建技术，实现散货体积的精准计算与分析。</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>用户手册: <a href="#">下载 PDF 版用户手册</a></li>
+                        <li>视频教程: <a href="#">查看系统操作视频教程</a></li>
+                        <li>常见问题: <a href="#">浏览常见问题解答</a></li>
+                    </ul>
+                    <div class="version-info">
+                        <h3>关于系统</h3>
+                        <p>版本: v1.0.0</p>
+                        <p>发布日期: 2025-08-01</p>
+                        <p>版权所有: 中信梧桐港</p>
+                        <p>技术支持: 400-123-4567</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加用户模态框 -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <h2>添加用户</h2>
+            <div class="form-group">
+                <label for="newUsername">用户名</label>
+                <input type="text" id="newUsername" class="form-control" placeholder="输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">密码</label>
+                <input type="password" id="newPassword" class="form-control" placeholder="输入密码">
+            </div>
+            <div class="form-group">
+                <label for="newRole">角色</label>
+                <select id="newRole" class="form-control">
+                    <option value="admin">管理员</option>
+                    <option value="operator">操作员</option>
+                    <option value="viewer">查看员</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddUser">取消</button>
+                <button class="btn btn-primary" id="confirmAddUser">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签切换
+        const tabs = document.querySelectorAll('.settings-tab');
+        const panels = document.querySelectorAll('.settings-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有活动标签和面板
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+
+                // 添加活动类到当前标签
+                tab.classList.add('active');
+
+                // 显示对应的面板
+                const panelId = tab.getAttribute('data-tab');
+                document.getElementById(panelId).classList.add('active');
+            });
+        });
+
+        // 添加用户模态框
+        const addUserBtn = document.getElementById('addUserBtn');
+        const addUserModal = document.getElementById('addUserModal');
+        const cancelAddUser = document.getElementById('cancelAddUser');
+        const confirmAddUser = document.getElementById('confirmAddUser');
+
+        addUserBtn.addEventListener('click', () => {
+            addUserModal.style.display = 'flex';
+        });
+
+        cancelAddUser.addEventListener('click', () => {
+            addUserModal.style.display = 'none';
+        });
+
+        confirmAddUser.addEventListener('click', () => {
+            alert('用户添加功能将在后续版本实现');
+            addUserModal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        addUserModal.addEventListener('click', (e) => {
+            if (e.target === addUserModal) {
+                addUserModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

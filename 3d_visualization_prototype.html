@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天巡散货体积监测系统 - 三维展示</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px; /* 保持与其他页面一致 */
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box; /* 确保padding不会增加宽度 */
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .selection-controls {
+            display: flex;
+            gap: 15px;
+            margin-left: 20px;
+        }
+        .yard-selector, .date-selector, .time-selector {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            width: 100px;
+        }
+        .date-selector {
+            width: 150px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .tool-bar {
+            background-color: white;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .tool-button {
+            padding: 6px 12px;
+            background-color: #ecf0f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tool-button:hover {
+            background-color: #d6dbdf;
+        }
+        .tool-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .content-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        #scene-container {
+            flex: 1;
+            background-color: #f0f0f0;
+        }
+        .info-panel {
+            width: 250px; /* 调整为与侧边栏相同宽度 */
+            background-color: white;
+            padding: 15px;
+            overflow-y: auto;
+            border-left: 1px solid #eee;
+        }
+        .info-panel h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .pile-list {
+            list-style: none;
+        }
+        .pile-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .pile-item:hover {
+            background-color: #f9f9f9;
+        }
+        .pile-item.active {
+            background-color: #e8f4fd;
+        }
+        .pile-info {
+            display: flex;
+            justify-content: space-between;
+        }
+        .pile-id {
+            font-weight: bold;
+        }
+        .pile-volume {
+            color: #27ae60;
+        }
+        .clear-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .acquisition-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .info-item {
+            margin-bottom: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>天巡散货体积监测系统</h2>
+            <ul>
+                <li><a href="dashboard.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">首页</a></li>
+                <li><a href="data_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">数据管理</a></li>
+                <li><a href="task_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">任务管理</a></li>
+                <li class="active"><a href="3d_visualization_prototype.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">三维展示</a></li>
+                <li><a href="result_analysis.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">结果分析</a></li>
+                <li><a href="report_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">报告管理</a></li>
+                <li><a href="system_settings.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <h1>三维展示</h1>
+                    <div class="selection-controls">
+                        <select class="yard-selector" id="yard-selector">
+                            <option value="longkou">龙口煤场</option>
+                            <option value="qingdao">青岛煤场</option>
+                            <option value="shanghai">上海煤场</option>
+                            <option value="tianjin">天津煤场</option>
+                        </select>
+                        <input type="date" class="date-selector" id="date-selector" value="2025-08-17">
+                        <select class="time-selector" id="time-selector">
+                            <option value="1">第1次</option>
+                            <option value="2">第2次</option>
+                        </select>
+                        <button class="btn btn-primary" id="load-btn">加载</button>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <span>管理员</span>
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                </div>
+            </div>
+            <div class="tool-bar">
+                <button class="tool-button active" id="rotate-btn">旋转</button>
+                <button class="tool-button" id="pan-btn">平移</button>
+                <button class="tool-button" id="zoom-btn">缩放</button>
+                <button class="tool-button" id="measure-btn">测量</button>
+                <button class="tool-button" id="annotate-btn">标注</button>
+                <span style="margin-left: 20px;">显示：</span>
+                <button class="tool-button active" id="point-cloud-btn">点云</button>
+                <button class="tool-button" id="mesh-btn">网格</button>
+                <button class="tool-button" id="texture-btn">纹理</button>
+            </div>
+            <div class="content-area">
+                <div id="scene-container"></div>
+                <div class="info-panel">
+                    <div class="panel-header">
+                        <h3>货堆列表</h3>
+                    </div>
+                    <ul class="pile-list" id="pile-list">
+                        <!-- 煤堆列表将通过JavaScript动态生成 -->
+                    </ul>
+                    <div class="acquisition-info" id="acquisition-info">
+                        <div class="info-item"><span class="info-label">采集时间：</span> <span id="acquisition-time">2025-08-17 09:30:00</span></div>
+                        <div class="info-item"><span class="info-label">总煤堆数：</span> <span id="total-piles">5</span></div>
+                        <div class="info-item"><span class="info-label">总体积：</span> <span id="total-volume">9887.6 m³</span></div>
+                    </div>
+                    <h3 style="margin-top: 20px;">清表操作</h3>
+                    <div class="clear-buttons">
+                        <button class="btn btn-primary" id="auto-clear-btn">自动清表</button>
+                        <button class="btn btn-secondary" id="manual-clear-btn">手动清表</button>
+                        <button class="btn btn-danger" id="reset-btn">重置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化场景、相机和渲染器
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth * 2/3 / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth * 2/3, window.innerHeight - 100);
+        document.getElementById('scene-container').appendChild(renderer.domElement);
+
+        // 添加轨道控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+
+        // 添加光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+
+        // 创建地面
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x808080, side: THREE.DoubleSide });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // 创建网格辅助线
+        const gridHelper = new THREE.GridHelper(100, 10);
+        scene.add(gridHelper);
+
+        // 定义堆场数据 - 按日期和次数组织
+        const yardData = {
+            longkou: {
+                name: "龙口煤场",
+                dates: {
+                    "2025-08-17": {
+                        times: {
+                            1: {
+                                acquisitionTime: "2025-08-17 09:30:00",
+                                totalVolume: 9887.6,
+                                piles: [
+                                    { id: "P001", x: -15, z: -15, height: 8, volume: 1256.3, status: "已确认", color: 0x333333 },
+                                    { id: "P002", x: 5, z: -10, height: 10, volume: 2345.7, status: "待确认", color: 0x444444 },
+                                    { id: "P003", x: -5, z: 10, height: 9, volume: 1876.2, status: "已确认", color: 0x555555 },
+                                    { id: "P004", x: 15, z: 5, height: 7, volume: 987.5, status: "待确认", color: 0x666666 },
+                                    { id: "P005", x: 25, z: -20, height: 11, volume: 3421.9, status: "已确认", color: 0x777777 }
+                                ]
+                            },
+                            2: {
+                                acquisitionTime: "2025-08-17 14:30:00",
+                                totalVolume: 10234.5,
+                                piles: [
+                                    { id: "P001", x: -15, z: -15, height: 8.5, volume: 1345.2, status: "已确认", color: 0x333333 },
+                                    { id: "P002", x: 5, z: -10, height: 10, volume: 2345.7, status: "待确认", color: 0x444444 },
+                                    { id: "P003", x: -5, z: 10, height: 9.2, volume: 1987.3, status: "已确认", color: 0x555555 },
+                                    { id: "P004", x: 15, z: 5, height: 7, volume: 987.5, status: "待确认", color: 0x666666 },
+                                    { id: "P005", x: 25, z: -20, height: 11.5, volume: 3579.8, status: "已确认", color: 0x777777 }
+                                ]
+                            }
+                        }
+                    },
+                    "2025-08-16": {
+                        times: {
+                            1: {
+                                acquisitionTime: "2025-08-16 10:15:00",
+                                totalVolume: 9245.3,
+                                piles: [
+                                    { id: "P001", x: -15, z: -15, height: 7, volume: 1123.5, status: "已确认", color: 0x333333 },
+                                    { id: "P002", x: 5, z: -10, height: 9, volume: 2108.2, status: "已确认", color: 0x444444 },
+                                    { id: "P003", x: -5, z: 10, height: 8, volume: 1756.4, status: "已确认", color: 0x555555 },
+                                    { id: "P004", x: 15, z: 5, height: 6, volume: 897.3, status: "已确认", color: 0x666666 },
+                                    { id: "P005", x: 25, z: -20, height: 10, volume: 3359.9, status: "已确认", color: 0x777777 }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            qingdao: {
+                name: "青岛煤场",
+                dates: {
+                    "2025-08-17": {
+                        acquisitionTime: "2025-08-17 08:45:00",
+                        totalVolume: 5960.1,
+                        piles: [
+                            { id: "Q001", x: -10, z: -10, height: 7, volume: 986.2, status: "已确认", color: 0x333333 },
+                            { id: "Q002", x: 10, z: -15, height: 9, volume: 1765.3, status: "已确认", color: 0x444444 },
+                            { id: "Q003", x: 0, z: 15, height: 8, volume: 1342.1, status: "待确认", color: 0x555555 },
+                            { id: "Q004", x: 20, z: 5, height: 6, volume: 876.5, status: "已确认", color: 0x666666 }
+                        ]
+                    },
+                    "2025-08-16": {
+                        acquisitionTime: "2025-08-16 09:20:00",
+                        totalVolume: 5678.9,
+                        piles: [
+                            { id: "Q001", x: -10, z: -10, height: 6, volume: 876.1, status: "已确认", color: 0x333333 },
+                            { id: "Q002", x: 10, z: -15, height: 8, volume: 1654.2, status: "已确认", color: 0x444444 },
+                            { id: "Q003", x: 0, z: 15, height: 7, volume: 1234.5, status: "已确认", color: 0x555555 },
+                            { id: "Q004", x: 20, z: 5, height: 5, volume: 789.1, status: "已确认", color: 0x666666 }
+                        ]
+                    }
+                }
+            },
+            shanghai: {
+                name: "上海煤场",
+                dates: {
+                    "2025-08-17": {
+                        acquisitionTime: "2025-08-17 10:00:00",
+                        totalVolume: 10325.8,
+                        piles: [
+                            { id: "S001", x: -20, z: -5, height: 10, volume: 2456.7, status: "已确认", color: 0x333333 },
+                            { id: "S002", x: 0, z: -20, height: 8, volume: 1567.2, status: "待确认", color: 0x444444 },
+                            { id: "S003", x: 15, z: 10, height: 11, volume: 3215.9, status: "已确认", color: 0x555555 },
+                            { id: "S004", x: -10, z: 20, height: 7, volume: 1098.4, status: "已确认", color: 0x666666 },
+                            { id: "S005", x: 25, z: 15, height: 9, volume: 1987.6, status: "待确认", color: 0x777777 }
+                        ]
+                    },
+                    "2025-08-16": {
+                        acquisitionTime: "2025-08-16 09:45:00",
+                        totalVolume: 9876.5,
+                        piles: [
+                            { id: "S001", x: -20, z: -5, height: 9, volume: 2234.5, status: "已确认", color: 0x333333 },
+                            { id: "S002", x: 0, z: -20, height: 7, volume: 1456.2, status: "已确认", color: 0x444444 },
+                            { id: "S003", x: 15, z: 10, height: 10, volume: 3012.8, status: "已确认", color: 0x555555 },
+                            { id: "S004", x: -10, z: 20, height: 6, volume: 987.3, status: "已确认", color: 0x666666 },
+                            { id: "S005", x: 25, z: 15, height: 8, volume: 1876.7, status: "已确认", color: 0x777777 }
+                        ]
+                    }
+                }
+            },
+            tianjin: {
+                name: "天津煤场",
+                dates: {
+                    "2025-08-17": {
+                        acquisitionTime: "2025-08-17 09:15:00",
+                        totalVolume: 7111.8,
+                        piles: [
+                            { id: "T001", x: -15, z: -20, height: 9, volume: 1876.5, status: "已确认", color: 0x333333 },
+                            { id: "T002", x: 5, z: -15, height: 7, volume: 1234.8, status: "待确认", color: 0x444444 },
+                            { id: "T003", x: -5, z: 15, height: 10, volume: 2345.2, status: "已确认", color: 0x555555 },
+                            { id: "T004", x: 20, z: 0, height: 8, volume: 1654.3, status: "已确认", color: 0x666666 }
+                        ]
+                    },
+                    "2025-08-16": {
+                        acquisitionTime: "2025-08-16 08:30:00",
+                        totalVolume: 6789.2,
+                        piles: [
+                            { id: "T001", x: -15, z: -20, height: 8, volume: 1765.4, status: "已确认", color: 0x333333 },
+                            { id: "T002", x: 5, z: -15, height: 6, volume: 1123.7, status: "已确认", color: 0x444444 },
+                            { id: "T003", x: -5, z: 15, height: 9, volume: 2134.1, status: "已确认", color: 0x555555 },
+                            { id: "T004", x: 20, z: 0, height: 7, volume: 1543.0, status: "已确认", color: 0x666666 }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // 当前煤堆对象数组
+        let coalPiles = [];
+
+        // 创建煤堆函数
+        function createCoalPile(x, z, height, color) {
+            const radius = 5 + Math.random() * 3;
+            const segments = 32;
+            const geometry = new THREE.ConeGeometry(radius, height, segments);
+            const material = new THREE.MeshPhongMaterial({ color: color });
+            const pile = new THREE.Mesh(geometry, material);
+            pile.position.set(x, height/2, z);
+            pile.rotation.x = Math.PI;
+            return pile;
+        }
+
+        // 加载堆场数据
+        function loadYardData(yardId, date) {
+            // 清空现有煤堆
+            coalPiles.forEach(pile => scene.remove(pile));
+            coalPiles = [];
+
+            // 获取选定堆场和日期的数据
+            const yard = yardData[yardId];
+            if (!yard) return;
+
+            const dateData = yard.dates[date] || Object.values(yard.dates)[0];
+            if (!dateData) return;
+
+            // 获取选定次数
+            const timeSelector = document.getElementById('time-selector');
+            const time = timeSelector.value || 1;
+            const timeData = dateData.times[time] || dateData;
+
+            // 更新页面标题
+            document.querySelector('.header h1').textContent = `三维展示 - ${yard.name}`;
+
+            // 更新采集信息
+            document.getElementById('acquisition-time').textContent = timeData.acquisitionTime;
+            document.getElementById('total-piles').textContent = timeData.piles.length;
+            document.getElementById('total-volume').textContent = timeData.totalVolume.toFixed(1) + ' m³';
+
+            // 创建新煤堆并添加到场景
+            timeData.piles.forEach(pileData => {
+                const pile = createCoalPile(pileData.x, pileData.z, pileData.height, pileData.color);
+                pile.userData = { id: pileData.id };
+                coalPiles.push(pile);
+                scene.add(pile);
+            });
+
+            // 更新煤堆列表
+            updatePileList(timeData.piles);
+
+            // 重置相机位置
+            camera.position.set(30, 30, 30);
+            camera.lookAt(0, 0, 0);
+        }
+
+        // 更新煤堆列表
+        function updatePileList(piles) {
+            const pileList = document.getElementById('pile-list');
+            pileList.innerHTML = '';
+            piles.forEach(pile => {
+                const li = document.createElement('li');
+                li.className = 'pile-item';
+                li.setAttribute('data-id', pile.id);
+                li.innerHTML = `
+                    <div class="pile-info">
+                        <span class="pile-id">货堆 ${pile.id}</span>
+                        <span class="pile-volume">${pile.volume.toFixed(2)} m³</span>
+                    </div>
+                    <div class="pile-status">状态：${pile.status}</div>
+                `;
+                li.addEventListener('click', () => {
+                    document.querySelectorAll('.pile-item').forEach(i => i.classList.remove('active'));
+                    li.classList.add('active');
+                    // 高亮显示对应的货堆
+                    coalPiles.forEach(p => {
+                        if (p.userData.id === pile.id) {
+                            // 简单高亮效果 - 改变颜色
+                            p.material.color.set(0x3498db);
+                        } else {
+                            // 恢复原始颜色
+                            p.material.color.set(0x777777);  // 使用默认灰色
+                        }
+                    });
+                });
+                pileList.appendChild(li);  // 修复变量名错误
+            });
+
+            // 默认选中第一个货堆
+            if (pileList.firstChild) {
+                pileList.firstChild.classList.add('active');
+                // 触发点击事件以高亮显示第一个货堆
+                setTimeout(() => {
+                    if (pileList.firstChild) {
+                        pileList.firstChild.click();
+                    }
+                }, 100);
+            }
+        }
+
+        // 初始加载龙口煤场最新数据
+        // 检查URL参数
+        function getURLParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const pairs = queryString.split('&');
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i].split('=');
+                params[pair[0]] = decodeURIComponent(pair[1] || '');
+            }
+            return params;
+        }
+
+        // 获取URL参数
+        const urlParams = getURLParams();
+        let initialYard = 'longkou';
+        let initialDate = '';
+        let initialTime = '1';
+
+        // 如果有URL参数，则使用参数值
+        if (urlParams.site) {
+            initialYard = urlParams.site;
+        }
+
+        // 确保initDateSelector和loadYardData函数已定义
+        if (typeof initDateSelector === 'function') {
+            initDateSelector(initialYard);
+        }
+
+        const dateSelector = document.getElementById('date-selector');
+        if (dateSelector && typeof loadYardData === 'function') {
+            // 如果有日期参数，则使用参数值
+            if (urlParams.date) {
+                // 查找是否有匹配的日期选项
+                let dateFound = false;
+                for (let i = 0; i < dateSelector.options.length; i++) {
+                    if (dateSelector.options[i].value === urlParams.date) {
+                        dateSelector.value = urlParams.date;
+                        dateFound = true;
+                        break;
+                    }
+                }
+                // 如果没有找到匹配的日期，则使用默认值
+                initialDate = dateFound ? urlParams.date : dateSelector.value;
+            } else {
+                initialDate = dateSelector.value;
+            }
+
+            // 加载数据
+            loadYardData(initialYard, initialDate);
+
+            // 如果有次数参数，则设置次数选择器
+            if (urlParams.time) {
+                const timeSelector = document.getElementById('time-selector');
+                if (timeSelector) {
+                    // 查找是否有匹配的次数选项
+                    for (let i = 0; i < timeSelector.options.length; i++) {
+                        if (timeSelector.options[i].value === urlParams.time) {
+                            timeSelector.value = urlParams.time;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth * 2/3 / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth * 2/3, window.innerHeight - 100);
+        });
+
+        // 堆场选择器事件
+        document.getElementById('yard-selector').addEventListener('change', (e) => {
+            const yardId = e.target.value;
+            initDateSelector(yardId);
+            loadYardData(yardId, document.getElementById('date-selector').value);
+        });
+
+        // 日期选择器事件
+        document.getElementById('date-selector').addEventListener('change', (e) => {
+            const yardId = document.getElementById('yard-selector').value;
+            const date = e.target.value;
+            initTimeSelector(yardId, date);
+        });
+
+        // 次数选择器事件
+        document.getElementById('time-selector').addEventListener('change', () => {
+            const yardId = document.getElementById('yard-selector').value;
+            const date = document.getElementById('date-selector').value;
+            loadYardData(yardId, date);
+        });
+
+        // 工具按钮事件
+        document.getElementById('rotate-btn').addEventListener('click', () => {
+            controls.enableRotate = true;
+            controls.enablePan = false;
+            updateToolButtons('rotate-btn');
+        });
+
+        document.getElementById('pan-btn').addEventListener('click', () => {
+            controls.enableRotate = false;
+            controls.enablePan = true;
+            updateToolButtons('pan-btn');
+        });
+
+        document.getElementById('zoom-btn').addEventListener('click', () => {
+            // 缩放是轨道控制器的默认功能，这里只需更新按钮状态
+            updateToolButtons('zoom-btn');
+        });
+
+        document.getElementById('measure-btn').addEventListener('click', () => {
+            alert('测量功能将在后续版本实现');
+            updateToolButtons('measure-btn');
+        });
+
+        document.getElementById('annotate-btn').addEventListener('click', () => {
+            alert('标注功能将在后续版本实现');
+            updateToolButtons('annotate-btn');
+        });
+
+        document.getElementById('point-cloud-btn').addEventListener('click', () => {
+            // 在原型中，我们只是切换显示模式的按钮状态
+            updateDisplayButtons('point-cloud-btn');
+        });
+
+        document.getElementById('mesh-btn').addEventListener('click', () => {
+            updateDisplayButtons('mesh-btn');
+        });
+
+        document.getElementById('texture-btn').addEventListener('click', () => {
+            updateDisplayButtons('texture-btn');
+        });
+
+        // 清表按钮事件
+        document.getElementById('auto-clear-btn').addEventListener('click', () => {
+            const yardId = document.getElementById('yard-selector').value;
+            const date = document.getElementById('date-selector').value;
+            alert(`对${yardData[yardId].name}(${date})执行自动清表功能，正在处理...`);
+            // 在实际应用中，这里会执行清表算法并更新三维场景
+        });
+
+        document.getElementById('manual-clear-btn').addEventListener('click', () => {
+            alert('手动清表功能将在后续版本实现');
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            const yardId = document.getElementById('yard-selector').value;
+            const date = document.getElementById('date-selector').value;
+            alert('重置场景功能已触发');
+            // 重新加载当前堆场和日期的数据
+            loadYardData(yardId, date);
+        });
+
+        // 更新工具按钮状态
+        function updateToolButtons(activeId) {
+            document.querySelectorAll('.tool-button').forEach(btn => {
+                if (btn.id === 'rotate-btn' || btn.id === 'pan-btn' || btn.id === 'zoom-btn' || 
+                    btn.id === 'measure-btn' || btn.id === 'annotate-btn') {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById(activeId).classList.add('active');
+        }
+
+        // 更新显示按钮状态
+        function updateDisplayButtons(activeId) {
+            document.querySelectorAll('.tool-button').forEach(btn => {
+                if (btn.id === 'point-cloud-btn' || btn.id === 'mesh-btn' || btn.id === 'texture-btn') {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById(activeId).classList.add('active');
+        }
+
+        // 初始化日期选择器
+        function initDateSelector(yardId) {
+            const yard = yardData[yardId];
+            if (!yard) return;
+            
+            const dateSelector = document.getElementById('date-selector');
+            const dateOptions = Object.keys(yard.dates);
+            
+            // 清空现有选项
+            dateSelector.innerHTML = '';
+            
+            // 添加所有可用日期
+            dateOptions.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateSelector.appendChild(option);
+            });
+            
+            // 设置默认值为最新日期
+            if (dateOptions.length > 0) {
+                dateSelector.value = dateOptions[0];
+            }
+            
+            // 初始化次数选择器
+            initTimeSelector(yardId, dateSelector.value);
+        }
+        
+        // 初始化次数选择器
+        function initTimeSelector(yardId, date) {
+            const yard = yardData[yardId];
+            if (!yard) return;
+            
+            const dateData = yard.dates[date];
+            if (!dateData) return;
+            
+            const timeSelector = document.getElementById('time-selector');
+            
+            // 清空现有选项
+            timeSelector.innerHTML = '';
+            
+            // 获取当天的次数 - 默认至少有一次
+            const times = Object.keys(dateData.times || {1: {}});
+            
+            // 添加所有可用次数
+            times.forEach(time => {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = `第${time}次`;
+                timeSelector.appendChild(option);
+            });
+        }
+
+        // 加载按钮事件
+        document.getElementById('load-btn').addEventListener('click', () => {
+            const yardId = document.getElementById('yard-selector').value;
+            const date = document.getElementById('date-selector').value;
+            loadYardData(yardId, date);
+        });
+    </script>
+</body>
+</html>

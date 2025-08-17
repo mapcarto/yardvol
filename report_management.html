@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天巡散货体积监测系统 - 报告管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .toolbar {
+            background-color: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .report-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .report-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px;
+        }
+        .filter-group label {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .filter-control {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            height: 36px;  /* 添加明确的高度设置 */
+            box-sizing: border-box;  /* 确保内边距和边框不会增加总高度 */
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .report-table th, .report-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .report-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .report-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .report-type {
+            display: flex;
+            align-items: center;
+        }
+        .report-icon {
+            margin-right: 8px;
+        }
+        .generate-report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>天巡散货体积监测系统</h2>
+            <ul>
+                <li><a href="dashboard.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">首页</a></li>
+                <li><a href="data_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">数据管理</a></li>
+                <li><a href="task_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">任务管理</a></li>
+                <li><a href="3d_visualization_prototype.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">三维展示</a></li>
+                <li><a href="result_analysis.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">结果分析</a></li>
+                <li class="active"><a href="report_management.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">报告管理</a></li>
+                <li><a href="system_settings.html" style="color: white; text-decoration: none; display: block; padding: 10px 0;">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>报告管理</h1>
+                <div class="user-info">
+                    <span>管理员</span>
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                </div>
+            </div>
+            <div class="toolbar">
+                <input type="text" class="search-box" placeholder="搜索报告...">
+                <button class="btn btn-primary" id="generateReportBtn">生成报告</button>
+            </div>
+            <div class="report-content">
+                <div class="report-filters">
+                    <div class="filter-group">
+                        <label for="reportTypeFilter">报告类型</label>
+                        <select id="reportTypeFilter" class="filter-control">
+                            <option value="all">全部类型</option>
+                            <option value="daily">日报</option>
+                            <option value="weekly">周报</option>
+                            <option value="monthly">月报</option>
+                            <option value="custom">自定义报告</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateFrom">开始日期</label>
+                        <input type="date" id="dateFrom" class="filter-control">
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateTo">结束日期</label>
+                        <input type="date" id="dateTo" class="filter-control">
+                    </div>
+                    <div class="filter-group">
+                        <label for="siteFilter">场地</label>
+                        <select id="siteFilter" class="filter-control">
+                            <option value="all">全部场地</option>
+                            <option value="longkou">龙口煤场</option>
+                            <option value="qinhuangdao">秦皇岛煤场</option>
+                            <option value="tianjin">天津港</option>
+                            <option value="huanghua">黄骅港</option>
+                            <option value="rizhao">日照港</option>
+                        </select>
+                    </div>
+                    <div style="align-self: flex-end;
+                        margin-right: 20px;">
+                        <button class="btn btn-primary" id="applyFilters">应用筛选</button>
+                    </div>
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>报告ID</th>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>场地</th>
+                            <th>生成时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>R001</td>
+                            <td>龙口煤场日报 (2025-08-15)</td>
+                            <td><div class="report-type"><span class="report-icon">📅</span>日报</div></td>
+                            <td>龙口煤场</td>
+                            <td>2025-08-15 17:30</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除 | <a href="javascript:void(0)" class="view-3d" data-site="longkou" data-date="2025-08-15" data-time="1">3D</a></td>
+                        </tr>
+                        <tr>
+                            <td>R002</td>
+                            <td>秦皇岛煤场日报 (2025-08-16)</td>
+                            <td><div class="report-type"><span class="report-icon">📅</span>日报</div></td>
+                            <td>秦皇岛煤场</td>
+                            <td>2025-08-16 17:30</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除 | <a href="javascript:void(0)" class="view-3d" data-site="qinhuangdao" data-date="2025-08-16" data-time="1">3D</a></td>
+                        </tr>
+                        <tr>
+                            <td>R003</td>
+                            <td>天津港周报 (2025-08-10至2025-08-16)</td>
+                            <td><div class="report-type"><span class="report-icon">📆</span>周报</div></td>
+                            <td>天津港</td>
+                            <td>2025-08-17 10:00</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除 | <a href="javascript:void(0)" class="view-3d" data-site="tianjin" data-date="2025-08-16" data-time="1">3D</a></td>
+                        </tr>
+                        <tr>
+                            <td>R004</td>
+                            <td>黄骅港日报 (2025-08-17)</td>
+                            <td><div class="report-type"><span class="report-icon">📅</span>日报</div></td>
+                            <td>黄骅港</td>
+                            <td>2025-08-17 17:30</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除 | <a href="javascript:void(0)" class="view-3d" data-site="huanghua" data-date="2025-08-17" data-time="1">3D</a></td>
+                        </tr>
+                        <tr>
+                            <td>R005</td>
+                            <td>日照港日报 (2025-08-18)</td>
+                            <td><div class="report-type"><span class="report-icon">📅</span>日报</div></td>
+                            <td>日照港</td>
+                            <td>2025-08-18 17:30</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除 | <a href="javascript:void(0)" class="view-3d" data-site="rizhao" data-date="2025-08-18" data-time="1">3D</a></td>
+                        </tr>
+                        <tr>
+                            <td>R006</td>
+                            <td>北方港口月度报告 (2025-07)</td>
+                            <td><div class="report-type"><span class="report-icon">📊</span>月报</div></td>
+                            <td>全部场地</td>
+                            <td>2025-08-01 10:00</td>
+                            <td>已完成</td>
+                            <td>查看 | 下载 | 删除</td>
+                        </tr>
+                        <tr>
+                            <td>R007</td>
+                            <td>龙口煤场自定义报告</td>
+                            <td><div class="report-type"><span class="report-icon">📋</span>自定义报告</div></td>
+                            <td>龙口煤场</td>
+                            <td>2025-08-19 09:30</td>
+                            <td>生成中</td>
+                            <td>查看 | 取消</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 生成报告模态框 -->
+    <div class="generate-report-modal" id="generateReportModal">
+        <div class="modal-content">
+            <h2>生成报告</h2>
+            <div class="form-group">
+                <label for="reportName">报告名称</label>
+                <input type="text" id="reportName" class="form-control" placeholder="输入报告名称">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportType">报告类型</label>
+                    <select id="reportType" class="form-control">
+                        <option value="daily">日报</option>
+                        <option value="weekly">周报</option>
+                        <option value="monthly">月报</option>
+                        <option value="custom">自定义报告</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportSite">场地</label>
+                    <select id="reportSite" class="form-control">
+                        <option value="all">全部场地</option>
+                        <option value="longkou">龙口煤场</option>
+                        <option value="qinhuangdao">秦皇岛煤场</option>
+                        <option value="tianjin">天津港</option>
+                        <option value="huanghua">黄骅港</option>
+                        <option value="rizhao">日照港</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportStartDate">开始日期</label>
+                    <input type="date" id="reportStartDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="reportEndDate">结束日期</label>
+                    <input type="date" id="reportEndDate" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="reportFormat">报告格式</label>
+                <select id="reportFormat" class="form-control">
+                    <option value="pdf">PDF</option>
+                    <option value="excel">Excel</option>
+                    <option value="word">Word</option>
+                    <option value="html">HTML</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reportDescription">报告描述</label>
+                <textarea id="reportDescription" class="form-control" rows="3" placeholder="输入报告描述"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelGenerate">取消</button>
+                <button class="btn btn-primary" id="confirmGenerate">生成</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模态框控制
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const generateReportModal = document.getElementById('generateReportModal');
+        const cancelGenerate = document.getElementById('cancelGenerate');
+        const confirmGenerate = document.getElementById('confirmGenerate');
+        const applyFilters = document.getElementById('applyFilters');
+
+        generateReportBtn.addEventListener('click', () => {
+            generateReportModal.style.display = 'flex';
+        });
+
+        cancelGenerate.addEventListener('click', () => {
+            generateReportModal.style.display = 'none';
+        });
+
+        confirmGenerate.addEventListener('click', () => {
+            alert('报告生成功能将在后续版本实现');
+            generateReportModal.style.display = 'none';
+        });
+
+        applyFilters.addEventListener('click', () => {
+            alert('筛选功能将在后续版本实现');
+        });
+
+        // 点击模态框外部关闭
+        generateReportModal.addEventListener('click', (e) => {
+            if (e.target === generateReportModal) {
+                generateReportModal.style.display = 'none';
+            }
+        });
+
+        // 3D标签点击事件
+        document.querySelectorAll('.view-3d').forEach(link => {
+            link.addEventListener('click', function() {
+                const site = this.getAttribute('data-site');
+                const date = this.getAttribute('data-date');
+                const time = this.getAttribute('data-time');
+                
+                // 跳转到三维展示页面，并传递参数
+                window.location.href = `3d_visualization_prototype.html?site=${site}&date=${date}&time=${time}`;
+            });
+        });
+    </script>
+</body>
+</html>

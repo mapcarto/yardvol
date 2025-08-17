@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天巡散货体积监测系统 - 任务管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .sidebar li:hover {
+            background-color: #34495e;
+        }
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info span {
+            margin-right: 15px;
+        }
+        .toolbar {
+            background-color: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .task-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .task-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            padding: 6px 12px;
+            background-color: #ecf0f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .filter-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .task-table th, .task-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .batch-actions {
+            display: none;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .batch-actions button {
+            margin-right: 10px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .advanced-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .advanced-filter .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        .toggle-advanced-filter {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        .task-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .task-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+        .status-completed {
+            background-color: #27ae60;
+            color: white;
+        }
+        .status-failed {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status-canceled {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .create-task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>天巡散货体积监测系统</h2>
+            <ul>
+                <li><a href="dashboard.html" style="color: white; text-decoration: none; display: block;">首页</a></li>
+                <li><a href="data_management.html" style="color: white; text-decoration: none; display: block;">数据管理</a></li>
+                <li class="active"><a href="task_management.html" style="color: white; text-decoration: none; display: block;">任务管理</a></li>
+                <li><a href="3d_visualization_prototype.html" style="color: white; text-decoration: none; display: block;">三维展示</a></li>
+                <li><a href="result_analysis.html" style="color: white; text-decoration: none; display: block;">结果分析</a></li>
+                <li><a href="report_management.html" style="color: white; text-decoration: none; display: block;">报告管理</a></li>
+                <li><a href="system_settings.html" style="color: white; text-decoration: none; display: block;">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h1>任务管理</h1>
+                <div class="user-info">
+                    <span>管理员</span>
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                </div>
+            </div>
+            <div class="toolbar">
+                <input type="text" class="search-box" placeholder="搜索任务...">
+                <div>
+                    <button class="btn btn-secondary" id="toggleFilterBtn">高级筛选</button>
+                    <button class="btn btn-primary" id="createTaskBtn">创建任务</button>
+                </div>
+            </div>
+            <div class="task-content">
+                <div class="toggle-advanced-filter" id="advancedFilterToggle" style="display: none;">
+                    <a href="#" id="showAdvancedFilter">显示高级筛选</a>
+                </div>
+                <div class="advanced-filter" id="advancedFilter" style="display: none;">
+                    <div class="form-group">
+                        <label for="filterType">任务类型</label>
+                        <select id="filterType" class="form-control">
+                            <option value="all">全部类型</option>
+                            <option value="3d_reconstruction">三维重建</option>
+                            <option value="volume_calculation">体积计算</option>
+                            <option value="data_processing">数据处理</option>
+                            <option value="report_generation">报告生成</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterPriority">优先级</label>
+                        <select id="filterPriority" class="form-control">
+                            <option value="all">全部优先级</option>
+                            <option value="low">低</option>
+                            <option value="medium">中</option>
+                            <option value="high">高</option>
+                            <option value="urgent">紧急</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterStartDate">开始日期</label>
+                        <input type="date" id="filterStartDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEndDate">结束日期</label>
+                        <input type="date" id="filterEndDate" class="form-control">
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button class="btn btn-primary" id="applyFilterBtn">应用筛选</button>
+                        <button class="btn btn-secondary" id="resetFilterBtn">重置</button>
+                    </div>
+                </div>
+                <div class="batch-actions" id="batchActions">
+                    <span>已选择 <span id="selectedCount">0</span> 个任务</span>
+                    <button class="btn btn-secondary" id="batchCancelBtn">取消</button>
+                    <button class="btn btn-secondary" id="batchRetryBtn">重试</button>
+                    <button class="btn btn-secondary" id="batchDeleteBtn">删除</button>
+                </div>
+                <div class="task-filters">
+                    <button class="filter-btn active">全部任务</button>
+                    <button class="filter-btn">进行中</button>
+                    <button class="filter-btn">已完成</button>
+                    <button class="filter-btn">已失败</button>
+                    <button class="filter-btn">已取消</button>
+                </div>
+                <div class="table-container">
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllTasks"></th>
+                                <th>任务ID</th>
+                                <th>名称</th>
+                                <th>类型</th>
+                                <th>数据来源</th>
+                                <th>创建时间</th>
+                                <th>预计完成</th>
+                                <th>状态</th>
+                                <th>进度</th>
+                                <th>优先级</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T001"></td>
+                                <td>T001</td>
+                                <td>龙口煤场扫描</td>
+                                <td>三维重建</td>
+                                <td>D001</td>
+                                <td>2025-08-15 09:30</td>
+                                <td>2025-08-15 11:30</td>
+                                <td><span class="status status-completed">已完成</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 100%"></div></div></td>
+                                <td>中</td>
+                                <td>查看 | 重试</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T002"></td>
+                                <td>T002</td>
+                                <td>秦皇岛煤场分析</td>
+                                <td>体积计算</td>
+                                <td>D002</td>
+                                <td>2025-08-16 10:15</td>
+                                <td>2025-08-16 12:00</td>
+                                <td><span class="status status-completed">已完成</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 100%"></div></div></td>
+                                <td>高</td>
+                                <td>查看 | 重试</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T003"></td>
+                                <td>T003</td>
+                                <td>天津港三维重建</td>
+                                <td>三维重建</td>
+                                <td>D003</td>
+                                <td>2025-08-17 08:45</td>
+                                <td>2025-08-17 11:00</td>
+                                <td><span class="status status-pending">进行中</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 65%"></div></div></td>
+                                <td>紧急</td>
+                                <td>查看 | 取消</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T004"></td>
+                                <td>T004</td>
+                                <td>黄骅港煤堆测量</td>
+                                <td>体积计算</td>
+                                <td>D004</td>
+                                <td>2025-08-17 13:20</td>
+                                <td>2025-08-17 15:00</td>
+                                <td><span class="status status-pending">进行中</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 40%"></div></div></td>
+                                <td>中</td>
+                                <td>查看 | 取消</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T005"></td>
+                                <td>T005</td>
+                                <td>日照港数据处理</td>
+                                <td>三维重建</td>
+                                <td>D005</td>
+                                <td>2025-08-18 09:00</td>
+                                <td>2025-08-18 11:00</td>
+                                <td><span class="status status-failed">已失败</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 30%"></div></div></td>
+                                <td>低</td>
+                                <td>查看 | 重试</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T006"></td>
+                                <td>T006</td>
+                                <td>青岛港体积分析</td>
+                                <td>体积计算</td>
+                                <td>D006</td>
+                                <td>2025-08-18 14:30</td>
+                                <td>2025-08-18 16:30</td>
+                                <td><span class="status status-pending">进行中</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 25%"></div></div></td>
+                                <td>高</td>
+                                <td>查看 | 取消</td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="task-checkbox" data-task-id="T007"></td>
+                                <td>T007</td>
+                                <td>唐山港数据处理</td>
+                                <td>三维重建</td>
+                                <td>D007</td>
+                                <td>2025-08-19 09:15</td>
+                                <td>2025-08-19 11:30</td>
+                                <td><span class="status status-canceled">已取消</span></td>
+                                <td><div class="progress-bar"><div class="progress-bar-fill" style="width: 15%"></div></div></td>
+                                <td>低</td>
+                                <td>查看 | 重试</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建任务模态框 -->
+    <div class="create-task-modal" id="createTaskModal">
+        <div class="modal-content">
+            <h2>创建新任务</h2>
+            <div class="form-group">
+                <label for="taskName">任务名称</label>
+                <input type="text" id="taskName" class="form-control" placeholder="输入任务名称">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="taskType">任务类型</label>
+                    <select id="taskType" class="form-control">
+                        <option value="3d_reconstruction">三维重建</option>
+                        <option value="volume_calculation">体积计算</option>
+                        <option value="data_processing">数据处理</option>
+                        <option value="report_generation">报告生成</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dataSource">数据来源</label>
+                    <select id="dataSource" class="form-control">
+                        <option value="D001">D001 - 龙口煤场点云数据</option>
+                        <option value="D002">D002 - 秦皇岛煤场影像</option>
+                        <option value="D003">D003 - 天津港三维模型</option>
+                        <option value="D004">D004 - 黄骅港煤堆测量数据</option>
+                        <option value="D006">D006 - 青岛港点云数据</option>
+                        <option value="new_data">上传新数据</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startDate">开始日期</label>
+                    <input type="date" id="startDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">预计完成日期</label>
+                    <input type="date" id="endDate" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="taskDescription">任务描述</label>
+                <textarea id="taskDescription" class="form-control" rows="3" placeholder="输入任务描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="taskPriority">优先级</label>
+                <select id="taskPriority" class="form-control">
+                    <option value="low">低</option>
+                    <option value="medium">中</option>
+                    <option value="high">高</option>
+                    <option value="urgent">紧急</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelCreate">取消</button>
+                <button class="btn btn-primary" id="confirmCreate">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模态框控制
+        const createTaskBtn = document.getElementById('createTaskBtn');
+        const createTaskModal = document.getElementById('createTaskModal');
+        const cancelCreate = document.getElementById('cancelCreate');
+        const confirmCreate = document.getElementById('confirmCreate');
+
+        createTaskBtn.addEventListener('click', () => {
+            createTaskModal.style.display = 'flex';
+        });
+
+        cancelCreate.addEventListener('click', () => {
+            createTaskModal.style.display = 'none';
+        });
+
+        confirmCreate.addEventListener('click', () => {
+            alert('任务创建功能将在后续版本实现');
+            createTaskModal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        createTaskModal.addEventListener('click', (e) => {
+            if (e.target === createTaskModal) {
+                createTaskModal.style.display = 'none';
+            }
+        });
+
+        // 筛选按钮切换
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+// ... existing HTML ...
+        // 高级筛选切换
+        const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+        const advancedFilter = document.getElementById('advancedFilter');
+        const advancedFilterToggle = document.getElementById('advancedFilterToggle');
+        const showAdvancedFilter = document.getElementById('showAdvancedFilter');
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+        toggleFilterBtn.addEventListener('click', () => {
+            advancedFilter.style.display = advancedFilter.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        showAdvancedFilter.addEventListener('click', (e) => {
+            e.preventDefault();
+            advancedFilter.style.display = 'flex';
+            advancedFilterToggle.style.display = 'none';
+        });
+
+        applyFilterBtn.addEventListener('click', () => {
+            // 这里添加筛选逻辑
+            alert('筛选功能将在后续版本实现');
+        });
+
+        resetFilterBtn.addEventListener('click', () => {
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterPriority').value = 'all';
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+        });
+
+        // 批量操作
+        const selectAllTasks = document.getElementById('selectAllTasks');
+        const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+        const batchActions = document.getElementById('batchActions');
+        const selectedCount = document.getElementById('selectedCount');
+        const batchCancelBtn = document.getElementById('batchCancelBtn');
+        const batchRetryBtn = document.getElementById('batchRetryBtn');
+        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+
+        function updateBatchActions() {
+            const checkedCount = document.querySelectorAll('.task-checkbox:checked').length;
+            selectedCount.textContent = checkedCount;
+            batchActions.style.display = checkedCount > 0 ? 'block' : 'none';
+        }
+
+        selectAllTasks.addEventListener('change', () => {
+            taskCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllTasks.checked;
+            });
+            updateBatchActions();
+        });
+
+        taskCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateBatchActions);
+        });
+
+        batchCancelBtn.addEventListener('click', () => {
+            alert('批量取消功能将在后续版本实现');
+        });
+
+        batchRetryBtn.addEventListener('click', () => {
+            alert('批量重试功能将在后续版本实现');
+        });
+
+        batchDeleteBtn.addEventListener('click', () => {
+            alert('批量删除功能将在后续版本实现');
+        });
+
+        // 任务详情模态框
+        const taskTable = document.querySelector('.task-table');
+        const taskDetailsModal = document.createElement('div');
+        taskDetailsModal.className = 'create-task-modal';
+        taskDetailsModal.id = 'taskDetailsModal';
+        taskDetailsModal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>任务详情</h2>
+                    <button class="modal-close" id="closeTaskDetails">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label>任务ID</label>
+                    <p id="detailTaskId"></p>
+                </div>
+                <div class="form-group">
+                    <label>任务名称</label>
+                    <p id="detailTaskName"></p>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>任务类型</label>
+                        <p id="detailTaskType"></p>
+                    </div>
+                    <div class="form-group">
+                        <label>优先级</label>
+                        <p id="detailTaskPriority"></p>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>创建时间</label>
+                        <p id="detailCreateTime"></p>
+                    </div>
+                    <div class="form-group">
+                        <label>预计完成时间</label>
+                        <p id="detailEndTime"></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>数据来源</label>
+                    <p id="detailDataSource"></p>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <p id="detailStatus"></p>
+                </div>
+                <div class="form-group">
+                    <label>进度</label>
+                    <div class="progress-bar"><div class="progress-bar-fill" id="detailProgressBar"></div></div>
+                </div>
+                <div class="form-group">
+                    <label>任务描述</label>
+                    <p id="detailTaskDescription"></p>
+                </div>
+                <div class="form-group">
+                    <label>执行日志</label>
+                    <div style="height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px; background-color: #f9f9f9;">
+                        <pre id="detailTaskLog"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="closeTaskDetailsBtn">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(taskDetailsModal);
+
+        const closeTaskDetails = document.getElementById('closeTaskDetails');
+        const closeTaskDetailsBtn = document.getElementById('closeTaskDetailsBtn');
+
+        closeTaskDetails.addEventListener('click', () => {
+            taskDetailsModal.style.display = 'none';
+        });
+
+        closeTaskDetailsBtn.addEventListener('click', () => {
+            taskDetailsModal.style.display = 'none';
+        });
+
+        taskDetailsModal.addEventListener('click', (e) => {
+            if (e.target === taskDetailsModal) {
+                taskDetailsModal.style.display = 'none';
+            }
+        });
+
+        // 为表格中的"查看"链接添加事件监听
+        taskTable.addEventListener('click', (e) => {
+            if (e.target.textContent.includes('查看')) {
+                const row = e.target.closest('tr');
+                const taskId = row.cells[1].textContent;
+                const taskName = row.cells[2].textContent;
+                const taskType = row.cells[3].textContent;
+                const dataSource = row.cells[4].textContent;
+                const createTime = row.cells[5].textContent;
+                const endTime = row.cells[6].textContent;
+                const status = row.cells[7].textContent;
+                const progressBar = row.cells[8].querySelector('.progress-bar-fill');
+                const progressWidth = progressBar ? progressBar.style.width : '0%';
+                const priority = row.cells[9].textContent;
+
+                // 填充详情模态框
+                document.getElementById('detailTaskId').textContent = taskId;
+                document.getElementById('detailTaskName').textContent = taskName;
+                document.getElementById('detailTaskType').textContent = taskType;
+                document.getElementById('detailTaskPriority').textContent = priority;
+                document.getElementById('detailCreateTime').textContent = createTime;
+                document.getElementById('detailEndTime').textContent = endTime;
+                document.getElementById('detailDataSource').textContent = dataSource;
+                document.getElementById('detailStatus').textContent = status;
+                document.getElementById('detailProgressBar').style.width = progressWidth;
+                document.getElementById('detailTaskDescription').textContent = '这是任务的详细描述内容...';
+                document.getElementById('detailTaskLog').textContent = '[' + createTime + '] 任务开始\n[' + new Date().toLocaleString() + '] 处理中...\n';
+
+                taskDetailsModal.style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>
