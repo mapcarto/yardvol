@@ -13,7 +13,7 @@
             </div>
             <h1>天巡散货体积监测</h1>
           </div>
-          <p class="subtitle">专业的散货体积测量与分析平台</p>
+          <p class="subtitle">智能监测 · 精准分析</p>
         </div>
 
         <el-form

@@ -6,77 +6,55 @@
       <div class="scene-container">
         <!-- 头部控制栏 - 使用与任务管理页面一致的风格 -->
         <div class="header-controls-overlay">
-          <div class="control-bar-wrapper">
-            <!-- 1. 可伸缩的输入区域 -->
-            <div class="flexible-inputs">
-              <el-select 
-                v-model="dataInfo.site" 
-                placeholder="请选择堆场" 
-                class="toolbar-select form-control" 
-                size="small"
-              >
-                <el-option value="龙口煤场" label="龙口煤场" />
-                <el-option value="青岛港" label="青岛港" />
-                <el-option value="天津港" label="天津港" />
-                <el-option value="上海港" label="上海港" />
-              </el-select>
+          <div class="advanced-filter-card show">
+            <!-- Left side: Data Selection Form -->
+            <div class="form-row">
               
-              <el-date-picker
-                v-model="dataInfo.date"
-                type="date"
-                placeholder="选择日期"
-                class="toolbar-datepicker form-control"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-                size="small"
-              />
-              
-              <el-select 
-                v-model="dataInfo.sequence" 
-                placeholder="请选择第次" 
-                class="toolbar-select form-control" 
-                size="small"
-              >
-                <el-option value="1" label="第1次" />
-                <el-option value="2" label="第2次" />
-                <el-option value="3" label="第3次" />
-                <el-option value="4" label="第4次" />
-                <el-option value="5" label="第5次" />
-              </el-select>
+                <div class="form-group">
+                <label for="filterYard">堆场名称</label>
+                  <el-select v-model="dataInfo.site" placeholder="选择堆场" class="form-control">
+                    <el-option value="龙口煤场" label="龙口煤场" />
+                    <el-option value="青岛港" label="青岛港" />
+                    <el-option value="天津港" label="天津港" />
+                    <el-option value="上海港" label="上海港" />
+                  </el-select>
+                </div>
+                <div class="form-group">
+                <label for="filterDate">采集日期</label>
+                  <el-date-picker
+                    v-model="dataInfo.date"
+                    type="date"
+                    placeholder="选择日期"
+                    class="form-control"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                  />
+                </div>
+                <div class="form-group">
+                <label for="filterSequence">第次</label>
+                  <el-select v-model="dataInfo.sequence" placeholder="选择第次" class="form-control">
+                    <el-option value="1" label="第1次" />
+                    <el-option value="2" label="第2次" />
+                    <el-option value="3" label="第3次" />
+                    <el-option value="4" label="第4次" />
+                    <el-option value="5" label="第5次" />
+                  </el-select>
+                </div>
+                <div class="filter-actions">
+                  <button class="btn btn-primary" @click="loadScene" :disabled="loading">
+                <i class="fas fa-sync-alt"></i>加载</button>
+                </div>
             </div>
 
-            <!-- 2. 固定宽度的按钮区域 -->
-            <div class="action-buttons">
-              <el-button 
-                type="primary" 
-                @click="loadScene" 
-                :loading="loading"
-                class="toolbar-button primary"
-                size="small"
-              >
-                <i class="fas fa-sync-alt"></i>
-                <span>加载</span>
-              </el-button>
-              <el-button 
-                type="default" 
-                @click="showPileDisplay" 
-                :disabled="!modelLoaded"
-                class="toolbar-button secondary"
-                size="small"
-              >
-                <i class="fas fa-layer-group"></i>
-                <span>分堆显示</span>
-              </el-button>
-              <el-button 
-                type="default" 
-                @click="toggleManualCleanTools" 
-                :disabled="!modelLoaded"
-                class="toolbar-button secondary"
-                size="small"
-              >
-                <i class="fas fa-hand-paper"></i>
-                <span>手动清表</span>
-              </el-button>
+            <!-- Right side: Action Buttons -->
+            </div>
+            <div class="filter-actions">
+              
+                <button class="btn btn-secondary" @click="showPileDisplay" :disabled="!modelLoaded">
+                <i class="fas fa-layer-group"></i>分堆显示</button>
+                <button class="btn btn-secondary" @click="toggleManualCleanTools" :disabled="!modelLoaded">
+                <i class="fas fa-hand-paper"></i>手动清表</button>
+              
             </div>
           </div>
         </div>
@@ -254,9 +232,7 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -501,10 +477,7 @@ const selectPile = (pileId: string) => {
     selectedPile.value = null
     // 恢复所有煤堆的原始颜色
     Object.values(coalPileMeshes).forEach(mesh => {
-      const material = mesh.material as THREE.MeshLambertMaterial
-      if (material.emissive && typeof material.emissive === 'object') {
-        material.emissive.set(0x000000)
-      }
+      (mesh.material as THREE.MeshLambertMaterial).emissive.set(0x000000)
     })
     ElMessage.info('已取消选中')
     return
@@ -514,20 +487,14 @@ const selectPile = (pileId: string) => {
   
   // 恢复所有煤堆的原始颜色
   Object.values(coalPileMeshes).forEach(mesh => {
-    const material = mesh.material as THREE.MeshLambertMaterial
-    if (material.emissive && typeof material.emissive === 'object') {
-      material.emissive.set(0x000000)
-    }
+    (mesh.material as THREE.MeshLambertMaterial).emissive.set(0x000000)
   })
   
   // 高亮选中的煤堆
   if (coalPileMeshes[pileId]) {
     // 使用更明显的高亮颜色
-    const material = coalPileMeshes[pileId].material as THREE.MeshLambertMaterial
-    if (material.emissive && typeof material.emissive === 'object') {
-      material.emissive.set(0xff9500)
-      material.emissiveIntensity = 0.8
-    }
+    (coalPileMeshes[pileId].material as THREE.MeshLambertMaterial).emissive.setHex(0xff9500)
+    (coalPileMeshes[pileId].material as THREE.MeshLambertMaterial).emissiveIntensity = 0.8
     
     // 将相机聚焦到选中的煤堆
     const position = coalPileMeshes[pileId].position.clone()
@@ -859,99 +826,13 @@ onUnmounted(() => {
   left: 1rem;
   right: 1rem;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  border-radius: 18px;
-  padding: 1.25rem 2rem;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  min-width: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
-
-
-
-.toolbar-select .el-input__wrapper,
-.toolbar-datepicker .el-input__wrapper {
-  background: var(--bg-color-secondary); /* 改为与任务管理页面一致的背景色 */
-  border: 2px solid var(--border-color); /* 改为2px边框 */
-  border-radius: 12px; /* 改为12px圆角 */
-  box-shadow: none;
-  backdrop-filter: blur(5px);
-  height: 44px;
-  line-height: 44px;
-  padding: 0.75rem; /* 添加padding */
-  color: var(--text-primary); /* 添加文字颜色 */
-}
-
-.toolbar-select .el-input__inner,
-.toolbar-datepicker .el-input__inner {
-  color: var(--text-primary); /* 改为与任务管理页面一致的文字颜色 */
-  font-size: 0.9rem; /* 改为与任务管理页面一致的字体大小 */
-  background: transparent;
-  height: 44px;
-  line-height: 44px;
-}
-
-.toolbar-select .el-select__caret,
-.toolbar-datepicker .el-input__prefix {
-  color: var(--text-primary); /* 改为与任务管理页面一致的图标颜色 */
-}
-
-.toolbar-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.75rem 1.25rem; /* 增加padding以增加按钮高度 */
-  transition: all 0.3s ease;
-  height: 40px; /* 明确设置按钮高度 */
-}
-
-.toolbar-button.primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: none;
-  color: white;
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
-}
-
-.toolbar-button.primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(59, 130, 246, 0.4);
-}
-
-.toolbar-button.primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.toolbar-button.secondary {
-  background: rgba(255, 255, 255, 0.2); /* 增加底色透明度，使其更协调 */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--text-primary);
-  backdrop-filter: blur(5px);
-}
-
-.toolbar-button.secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
-}
-
-.toolbar-button.secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* 深色模式下的按钮样式 */
-[data-theme="dark"] .toolbar-button.secondary {
-  color: white;
-}
-
-
 
 .controls-container {
   display: flex;
@@ -964,10 +845,7 @@ onUnmounted(() => {
 }
 
 .action-buttons-group {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  height: 40px;
+  /* Styles for the right side action buttons */
 }
 
 .data-info-display {
@@ -993,58 +871,110 @@ onUnmounted(() => {
   font-size: 1rem;
 }
 
-/* 新增样式：确保表单控件对齐整齐 */
-.data-selection-form {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: nowrap;
+.custom-select {
+  width: 120px;
 }
 
-.data-selection-form .el-form-item {
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
+.custom-date-picker {
+  width: 135px;
 }
 
-.data-selection-form .el-form-item__label {
-  margin-right: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
+:deep(.el-date-editor.el-input) {
+  width: 135px;
 }
 
-.data-selection-form .el-form-item__content {
-  display: flex;
-  align-items: center;
+/* 完全移除所有输入框的边框、阴影和背景 */
+:deep(.el-input__wrapper),
+:deep(.el-date-editor .el-input__wrapper) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 8px !important;
+  --el-input-bg-color: transparent !important;
+  --el-input-border-color: transparent !important;
+  --el-input-hover-border-color: transparent !important;
+  --el-input-focus-border-color: transparent !important;
 }
 
-/* 确保所有控件在同一水平线上 */
-.control-select,
-.el-date-editor {
-  height: 44px; /* 从40px增加到44px */
-  line-height: 44px;
+/* 确保输入文本和背景透明 */
+:deep(.el-input__inner) {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  height: 28px;
+  background-color: transparent !important;
+  --el-input-bg-color: transparent !important;
 }
 
-.control-select .el-input__wrapper,
-.el-date-editor .el-input__wrapper {
-  height: 44px;
-  line-height: 44px;
+/* 下拉箭头颜色 */
+:deep(.el-select .el-input .el-select__caret) {
+  color: var(--text-color);
 }
 
-.control-select .el-input__inner,
-.el-date-editor .el-input__inner {
-  height: 44px;
-  line-height: 44px;
+/* 隐藏日期选择器图标 */
+:deep(.el-date-editor .el-input__prefix) {
+  display: none !important;
 }
 
-/* 操作按钮样式统一 */
-.action-btn {
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* 下拉菜单样式 */
+:deep(.el-select__popper), 
+:deep(.el-picker__popper) {
+  border: 1px solid var(--border-color) !important;
+}
+
+/* 确保下拉框在悬停和聚焦时也没有边框和背景 */
+:deep(.el-input.is-focus .el-input__wrapper),
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-input__wrapper:hover),
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-select .el-input.is-focus .el-input__wrapper),
+:deep(.el-date-editor.is-active .el-input__wrapper) {
+  box-shadow: none !important;
+  border: none !important;
+  background-color: transparent !important;
+  --el-select-input-focus-border-color: transparent !important;
+}
+
+/* 强制覆盖所有下拉组件的样式 */
+.data-info-item .el-select .el-input__wrapper,
+.data-info-item .el-date-editor .el-input__wrapper {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: none !important;
+}
+
+/* 强制移除下拉组件的边框和背景 */
+.data-info-item .el-select,
+.data-info-item .el-date-picker {
+  background: transparent !important;
+}
+
+/* 确保下拉组件内部元素透明 */
+.data-info-item .el-select *,
+.data-info-item .el-date-picker * {
+  background-color: transparent !important;
+}
+
+/* 覆盖Element Plus的默认变量 */
+:deep(.el-select),
+:deep(.el-date-editor) {
+  --el-select-input-focus-border-color: transparent !important;
+  --el-input-hover-border-color: transparent !important;
+  --el-input-focus-border-color: transparent !important;
+  --el-input-border-color: transparent !important;
+  --el-input-bg-color: transparent !important;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .scene-selector {
@@ -1061,12 +991,7 @@ onUnmounted(() => {
   background: var(--card-bg);
   color: var(--text-primary);
   font-size: 0.875rem;
-  min-width: 150px;
-}
-
-/* 为堆场名称选择框设置更宽的宽度 */
-.control-select:first-child {
-  min-width: 180px;
+  min-width: 120px;
 }
 
 .btn {
@@ -1138,103 +1063,6 @@ onUnmounted(() => {
   gap: 0.5rem;
   z-index: 40;
 }
-
-
-
-.toolbar-select .el-input__wrapper,
-.toolbar-datepicker .el-input__wrapper {
-  background: var(--bg-color-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: none;
-  backdrop-filter: blur(5px);
-  height: 44px;
-  line-height: 44px;
-  padding: 0.75rem;
-  color: var(--text-primary);
-  width: 100%;
-}
-
-.toolbar-select .el-input__inner,
-.toolbar-datepicker .el-input__inner {
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  background: transparent;
-  height: 44px;
-  line-height: 44px;
-}
-
-.toolbar-select .el-select__caret,
-.toolbar-datepicker .el-input__prefix {
-  color: var(--text-primary);
-}
-
-.toolbar-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0 1rem;
-  transition: all 0.3s ease;
-  height: 44px;
-  line-height: 44px;
-}
-
-.toolbar-button.primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: none;
-  color: white;
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
-}
-
-.toolbar-button.primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(59, 130, 246, 0.4);
-}
-
-.toolbar-button.primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.toolbar-button.secondary {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--text-primary);
-  backdrop-filter: blur(5px);
-}
-
-.toolbar-button.secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-/* 白色风格下的secondary按钮样式增强对比度 */
-[data-theme="light"] .toolbar-button.secondary {
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .toolbar-button.secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.toolbar-button.secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 深色模式下的按钮样式 */
-[data-theme="dark"] .toolbar-button.secondary {
-  color: white;
-}
-
-
 
 .control-btn {
   width: 48px;
@@ -1737,68 +1565,6 @@ onUnmounted(() => {
     background: rgba(55, 65, 81, 0.8);
     border-color: rgba(75, 85, 99, 0.5);
   }
-  
-  /* 添加深色模式下工具栏下拉框和日期选择器样式 */
-  .toolbar-select .el-input__wrapper,
-  .toolbar-datepicker .el-input__wrapper {
-    background: var(--bg-color-secondary);
-    border-color: var(--border-color);
-    color: var(--text-primary);
-  }
-  
-  .toolbar-select .el-input__inner,
-  .toolbar-datepicker .el-input__inner {
-    background: transparent;
-    color: var(--text-primary);
-  }
-  
-  .toolbar-select .el-select__caret,
-  .toolbar-datepicker .el-input__prefix {
-    color: var(--text-primary);
-  }
-}
-
-/* Flexbox 布局解决方案 - 解决下拉框宽度问题 */
-.control-bar-wrapper {
-  display: flex;
-  align-items: center; /* 垂直居中对齐 */
-  width: 100%;
-  gap: 12px; /* 元素之间的美观间距 */
-}
-
-.flexible-inputs {
-  display: flex;
-  flex-grow: 1; /* 这是解决问题的魔法！让这个容器占据所有剩余空间 */
-  gap: 12px;
-}
-
-.flexible-inputs > * {
-  flex-grow: 1; /* 让容器内的每个输入框/下拉框平分空间 */
-}
-
-/* 调整下拉框和日期选择器的具体宽度 */
-.flexible-inputs > :first-child {
-  flex-grow: 0;
-  width: 120px; /* 堆场下拉框 */
-  min-width: 120px;
-}
-
-.flexible-inputs > :nth-child(2) {
-  flex-grow: 0;
-  width: 105px; /* 日期选择器 */
-  min-width: 105px;
-}
-
-.flexible-inputs > :nth-child(3) {
-  flex-grow: 0;
-  width: 80px; /* 第次下拉框 */
-  min-width: 80px;
-}
-
-.action-buttons {
-  display: flex;
-  flex-shrink: 0; /* 防止按钮在空间不足时被压缩 */
-  gap: 12px;
 }
 
 /* 复制自任务管理页面的下拉框样式 */

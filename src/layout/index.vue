@@ -9,7 +9,7 @@
       <div class="sidebar-header">
         <div class="header-content">
           <h2>天巡散货体积监测</h2>
-          <p>专业的散货体积测量与分析平台</p>
+          <p>智能监测 · 精准分析</p>
         </div>
         <button class="sidebar-toggle" @click="toggleSidebar" :title="isCollapsed ? '展开导航栏' : '收起导航栏'">
           <i :class="isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
@@ -70,9 +70,19 @@
     <div v-if="screensaverActive" class="screensaver" @click="toggleScreensaver">
       <div class="screensaver-content">
         <div class="screensaver-logo">
-          <i class="fas fa-cube"></i>
+          <svg class="drone-icon" viewBox="0 0 24 24" fill="currentColor">
+            <!-- 无人机主体 -->
+            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+            <!-- 四个旋翼 -->
+            <circle cx="6" cy="6" r="2.5" fill="currentColor"/>
+            <circle cx="18" cy="6" r="2.5" fill="currentColor"/>
+            <circle cx="6" cy="18" r="2.5" fill="currentColor"/>
+            <circle cx="18" cy="18" r="2.5" fill="currentColor"/>
+            <!-- 连接线 -->
+            <path d="M8.5 8.5L10 10M15.5 8.5L14 10M8.5 15.5L10 14M15.5 15.5L14 14" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
         </div>
-        <h1>天巡散货体积监测</h1>
+        <h1>守护每方货堆，亦暖每刻坚守</h1>
         <div class="screensaver-clock">{{ currentClock }}</div>
         <div class="screensaver-date">{{ currentDate }}</div>
         <div class="screensaver-hint">点击任意位置退出屏保</div>
@@ -748,6 +758,17 @@ onMounted(() => {
         filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.3));
         opacity: 0.6;
       }
+      
+      .drone-icon {
+        width: 4rem;
+        height: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: block;
+        animation: pulse 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.3));
+        opacity: 0.6;
+      }
     }
     
     h1 {
@@ -775,7 +796,7 @@ onMounted(() => {
       text-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
       letter-spacing: -2px;
       animation: glow 4s ease-in-out infinite alternate;
-      line-height: 0.85;
+      line-height: 1.4;
       font-variant-numeric: tabular-nums;
     }
     
@@ -905,6 +926,7 @@ onMounted(() => {
       font-size: 5rem;
       letter-spacing: -1px;
       font-weight: 700;
+      line-height: 1.4;
     }
     
     .screensaver-date {
