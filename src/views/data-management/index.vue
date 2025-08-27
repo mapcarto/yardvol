@@ -40,20 +40,6 @@
       >
         原始影像
       </div>
-      <div 
-        class="filter-tab" 
-        :class="{ active: activeFilter === 'model' }"
-        @click="setFilter('model')"
-      >
-        模型数据
-      </div>
-      <div 
-        class="filter-tab" 
-        :class="{ active: activeFilter === 'pointcloud' }"
-        @click="setFilter('pointcloud')"
-      >
-        点云数据
-      </div>
     </div>
 
     <!-- 数据表格 -->
@@ -97,7 +83,8 @@
                     v-if="item.type === 'image'"
                     :class="['action-btn', getImageActionClass(item.status)]"
                     @click="handleImageAction(item)"
-                    :disabled="item.status === 'completed' || item.status === 'processing'"
+                    :disabled="item.status === 'processing'"
+                    :style="item.status === 'completed' ? 'background-color: #9333ea; color: white;' : (item.status === 'processing' ? '' : 'background-color: #16a34a; color: white;')"
                   >
                     <i :class="getImageActionIcon(item.status)"></i>
                     {{ getImageActionText(item.status) }}
@@ -460,7 +447,8 @@ const yardOverview = ref([
 
 // 过滤后的数据
 const filteredAllData = computed(() => {
-  let filtered = dataList.value
+  // 首先只保留原始影像数据
+  let filtered = dataList.value.filter(item => item.type === 'image')
 
   // 按类型过滤
   if (activeFilter.value !== 'all') {
@@ -468,10 +456,6 @@ const filteredAllData = computed(() => {
       switch (activeFilter.value) {
         case 'raw':
           return item.type === 'image'
-        case 'model':
-          return item.type === 'model'
-        case 'pointcloud':
-          return item.type === 'pointcloud'
         default:
           return true
       }
@@ -599,29 +583,52 @@ const parseDataName = (filename: string) => {
 
 const getImageActionClass = (status) => {
   if (status === 'processing') return 'action-btn-processing';
-  if (status === 'completed') return 'action-btn-completed';
-  return 'action-btn-process';
+  if (status === 'completed') return 'action-btn-completed custom-purple';
+  return 'action-btn-process custom-green';
 };
 
 const getImageActionIcon = (status) => {
   if (status === 'processing') return 'fas fa-spinner fa-spin';
-  if (status === 'completed') return 'fas fa-check';
+  if (status === 'completed') return 'fas fa-cube';
   return 'fas fa-cogs';
 };
 
 const getImageActionText = (status) => {
   if (status === 'processing') return '处理中';
-  if (status === 'completed') return '已完成';
+  if (status === 'completed') return '3D';
   return '处理';
 };
 
 const handleImageAction = (item) => {
   if (item.status === 'pending') {
+    // 更新状态为处理中
     item.status = 'processing';
-    // Simulate processing time
+    
+    // 解析数据信息
+    const dataInfo = parseDataInfo(item);
+    
+    // 创建全流程处理任务
+    console.log(`创建全流程处理任务: ${item.name}`);
+    
+    // 显示任务创建成功的提示
+    alert(`已自动创建全流程处理任务：
+任务名称：${item.name}全流程处理
+数据来源：${dataInfo.site || '未知堆场'}
+处理内容：原始影像处理、三维模型生成、点云数据提取
+预计完成时间：40分钟`);
+    
+    // 模拟处理时间
     setTimeout(() => {
+      // 更新状态为已完成
       item.status = 'completed';
+      
+      // 显示处理完成的提示
+      alert(`${item.name} 全流程处理已完成！
+您现在可以点击"查看"按钮查看生成的三维模型和点云数据。`);
     }, 3000);
+  } else if (item.status === 'completed') {
+    // 跳转到三维展示页面查看对应场景的三维模型
+    viewData(item);
   }
 };
 
@@ -1019,8 +1026,8 @@ onMounted(() => {
 }
 
 .action-btn-process {
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: #16a34a !important;
+  color: white !important;
 }
 
 .action-btn-processing {
@@ -1030,9 +1037,9 @@ onMounted(() => {
 }
 
 .action-btn-completed {
-  background: #dcfce7;
-  color: #166534;
-  cursor: not-allowed;
+  background: #9333ea !important;
+  color: white !important;
+  cursor: pointer;
 }
 
 .disabled-operation {
@@ -1048,8 +1055,8 @@ onMounted(() => {
 }
 
 [data-theme="dark"] .data-management .action-btn-process {
-  background: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
+  background: rgba(34, 197, 94, 0.1) !important;
+  color: #22c55e !important;
 }
 
 [data-theme="dark"] .data-management .action-btn-processing {
@@ -1058,8 +1065,8 @@ onMounted(() => {
 }
 
 [data-theme="dark"] .data-management .action-btn-completed {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #a855f7 !important;
 }
 
 .filter-tab.disabled {

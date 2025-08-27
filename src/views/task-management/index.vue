@@ -218,13 +218,14 @@
               <td>{{ getPriorityLabel(task.priority) }}</td>
               <td>
                 <div class="action-buttons">
-                  <!-- 已完成的任务：只显示查看 -->
+                  <!-- 已完成的任务：显示3D按钮 -->
                   <button 
                     v-if="task.status === 'completed'"
-                    class="action-btn action-btn-view" 
+                    class="action-btn action-btn-completed" 
                     @click="viewTask(task)"
+                    style="background-color: #9333ea; color: white;"
                   >
-                    <i class="fas fa-eye"></i>查看
+                    <i class="fas fa-cube"></i>3D
                   </button>
                   
                   <!-- 已失败的任务：显示重试 -->
@@ -232,17 +233,20 @@
                     v-if="task.status === 'failed'"
                     class="action-btn action-btn-retry" 
                     @click="retryTask(task)"
+                    style="background-color: #10b981; color: white;"
                   >
                     <i class="fas fa-redo-alt"></i>重试
                   </button>
                   
-                  <!-- 进行中的任务：不显示任何操作按钮 -->
-                  <span 
+                  <!-- 进行中的任务：显示蓝色查看按钮 -->
+                  <button 
                     v-if="task.status === 'pending'"
-                    class="no-action-text"
+                    class="action-btn action-btn-view" 
+                    @click="viewTask(task)"
+                    style="background-color: #3b82f6; color: white;"
                   >
-                    -
-                  </span>
+                    <i class="fas fa-eye"></i>查看
+                  </button>
                 </div>
               </td>
             </tr>
@@ -580,6 +584,10 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+// 初始化路由
+const router = useRouter()
 
 // 响应式数据
 const searchKeyword = ref('')
@@ -1118,7 +1126,38 @@ const closeModal = () => {
 }
 
 const viewTask = (task: any) => {
-  ElMessage.info(`查看任务: ${task.name}`)
+  // 根据任务状态执行不同操作
+  if (task.status === 'completed') {
+    // 已完成任务：点击3D按钮跳转到三维展示页面
+    router.push({
+      path: '/3d-visualization',
+      query: {
+        dataId: task.id,
+        dataName: task.name,
+        dataType: task.type,
+        site: task.yard,
+        date: task.date,
+        sequence: task.sequence || '01'
+      }
+    })
+  } else {
+    // 其他状态：显示任务详情
+    ElMessageBox.alert(
+      `<div class="task-detail-popup">
+        <div class="task-detail-item"><strong>任务名称:</strong> ${task.name}</div>
+        <div class="task-detail-item"><strong>任务类型:</strong> ${getTypeLabel(task.type)}</div>
+        <div class="task-detail-item"><strong>堆场:</strong> ${task.yard}</div>
+        <div class="task-detail-item"><strong>创建时间:</strong> ${task.createTime}</div>
+        <div class="task-detail-item"><strong>当前状态:</strong> ${getStatusLabel(task.status)}</div>
+        <div class="task-detail-item"><strong>进度:</strong> ${task.progress ? Math.round(task.progress.current / task.progress.total * 100) : 0}%</div>
+      </div>`,
+      '任务状态详情',
+      {
+        dangerouslyUseHTMLString: true,
+        confirmButtonText: '关闭'
+      }
+    )
+  }
 }
 
 const retryTask = (task: any) => {
@@ -2524,6 +2563,25 @@ watch(
 [data-theme="dark"] .custom-date-picker .el-picker-panel__body-wrapper {
   /* 日期面板边框 */
   border: 1px solid var(--border-color);
+}
+
+/* 暗色模式下按钮样式 */
+[data-theme="dark"] button.action-btn.action-btn-completed {
+  background-color: rgba(147, 51, 234, 0.1) !important;
+  color: #9333ea !important;
+  border: 1px solid #9333ea !important;
+}
+
+[data-theme="dark"] button.action-btn.action-btn-retry {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #10b981 !important;
+  border: 1px solid #10b981 !important;
+}
+
+[data-theme="dark"] button.action-btn.action-btn-view {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+  border: 1px solid #3b82f6 !important;
 }
 
 /* 浅色主题优化 */
