@@ -1,0 +1,931 @@
+@use './variables.scss' as *;
+@use './reset.scss' as *;
+
+// 工具类
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-column { flex-direction: column; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-5 { padding: 1.25rem; }
+
+// 卡片样式
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+// 渐变文字
+.gradient-text {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// 动画
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+// 颜色工具类
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-success { color: var(--task-3d-color); }
+.text-warning { color: #f59e0b; }
+.text-danger { color: var(--task-clear-color); }
+.text-info { color: var(--task-volume-color); }
+
+/* 穿透 Element Plus 样式，修改下拉菜单背景 - 支持主题切换 */
+/* 浅色主题下的下拉背景 */
+[data-theme="light"] .el-select-dropdown {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .el-select-dropdown__item {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+[data-theme="light"] .el-select-dropdown__item:hover {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+[data-theme="light"] .el-select-dropdown__item:focus {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+[data-theme="light"] .el-select-dropdown__item.selected {
+  background-color: #e5e7eb !important;
+  color: #1f2937 !important;
+}
+
+/* 深色主题下的下拉背景 - 增强权重 */
+html[data-theme="dark"] .el-select-dropdown,
+body[data-theme="dark"] .el-select-dropdown,
+[data-theme="dark"] .el-select-dropdown {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .el-select-dropdown__item,
+body[data-theme="dark"] .el-select-dropdown__item,
+[data-theme="dark"] .el-select-dropdown__item {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .el-select-dropdown__item:hover,
+body[data-theme="dark"] .el-select-dropdown__item:hover,
+[data-theme="dark"] .el-select-dropdown__item:hover {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .el-select-dropdown__item:focus,
+body[data-theme="dark"] .el-select-dropdown__item:focus,
+[data-theme="dark"] .el-select-dropdown__item:focus {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .el-select-dropdown__item.selected,
+body[data-theme="dark"] .el-select-dropdown__item.selected,
+[data-theme="dark"] .el-select-dropdown__item.selected {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* 针对动态生成的下拉框使用更强的选择器 */
+.el-popper[data-popper-placement] {
+  [data-theme="dark"] & .el-select-dropdown {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  [data-theme="dark"] & .el-select-dropdown__item {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+  }
+  
+  [data-theme="dark"] & .el-select-dropdown__item:hover {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+  }
+}
+
+/* 让 Element Plus 的 el-select 与原有的 form-control 样式保持一致 */
+/* 重要：外层 el-select 容器必须完全透明，只让内层 wrapper 有样式 */
+.el-select.form-control {
+  /* 完全重置外层容器 */
+  all: unset !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  /* 确保容器完全透明 */
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  /* 移除任何可能的间距和装饰 */
+  text-decoration: none !important;
+  list-style: none !important;
+}
+
+/* 强制移除Element Plus可能添加的任何默认样式 */
+.el-select.form-control * {
+  box-sizing: border-box !important;
+}
+
+/* 只在内层 wrapper 上应用 form-control 的样式 */
+.el-select.form-control .el-select__wrapper {
+  background-color: var(--card-bg) !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
+  /* 确保高度与原生 form-control 一致 */
+  /* 精确计算: padding(0.75rem*2=24px) + border(2px*2=4px) + line-height(约26px) = 54px */
+  min-height: 54px !important;
+  height: 54px !important;
+  width: 100% !important;
+  outline: none !important;
+  /* 确保文字样式正确 */
+  font-size: 0.9rem !important;
+  color: var(--text-primary) !important;
+  /* 移除任何继承的边框 */
+  box-sizing: border-box !important;
+  /* 确保垂直对齐 */
+  display: flex !important;
+  align-items: center !important;
+}
+
+.el-select.form-control .el-select__wrapper:hover {
+  border-color: var(--primary-color) !important;
+}
+
+.el-select.form-control .el-select__wrapper.is-focused {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  background: var(--card-bg) !important;
+}
+
+.el-select.form-control .el-select__placeholder {
+  color: var(--text-secondary) !important;
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.el-select.form-control .el-select__selected-item {
+  color: var(--text-primary) !important;
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* 确保下拉箭头正确显示 */
+.el-select.form-control .el-select__caret {
+  color: var(--text-secondary) !important;
+  font-size: 14px !important;
+}
+
+.el-select.form-control .el-select__caret.is-reverse {
+  transform: rotate(180deg) !important;
+}
+
+/* 针对form-group容器内的Element Plus组件进行特殊处理 */
+.form-group .el-select {
+  /* 移除可能的外层样式 */
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 确保form-group不会给Element Plus组件添加额外的样式 */
+.form-group .el-select.form-control {
+  all: unset !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+/* 终极解决方案：全局强制移除Element Plus容器的所有可能样式 */
+.el-select {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 对于所有具有form-control类的el-select，强制移除外层样式 */
+.el-select.form-control,
+.form-group .el-select,
+.advanced-filter-card .el-select {
+  all: unset !important;
+  width: 100% !important;
+  display: block !important;
+  /* 确保容器不会占用额外空间 */
+  min-height: 0 !important;
+  line-height: normal !important;
+}
+
+/* Element Plus 日期选择器样式 - 与 el-select 保持一致 */
+.el-date-editor.form-control {
+  /* 外层容器完全透明 */
+  all: unset !important;
+  width: 100% !important;
+  display: block !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.el-date-editor.form-control .el-input__wrapper {
+  background-color: var(--card-bg) !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
+  /* 与 el-select 相同的高度 */
+  min-height: 54px !important;
+  height: 54px !important;
+  width: 100% !important;
+  outline: none !important;
+  font-size: 0.9rem !important;
+  color: var(--text-primary) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.el-date-editor.form-control .el-input__wrapper:hover {
+  border-color: var(--primary-color) !important;
+}
+
+.el-date-editor.form-control .el-input__wrapper.is-focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  background: var(--card-bg) !important;
+}
+
+.el-date-editor.form-control .el-input__inner {
+  color: var(--text-primary) !important;
+  font-size: 0.9rem !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+}
+
+.el-date-editor.form-control .el-input__prefix,
+.el-date-editor.form-control .el-input__suffix {
+  color: var(--text-secondary) !important;
+}
+
+/* Element Plus 日期选择器下拉面板主题支持 */
+/* 浅色主题下的日期选择器 */
+[data-theme="light"] .el-picker-panel {
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+[data-theme="light"] .el-date-table td.available:hover {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+[data-theme="light"] .el-date-table td.current:not(.disabled) {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+/* 深色主题下的日期选择器 */
+[data-theme="dark"] .el-picker-panel {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .el-picker-panel__header {
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .el-date-table td.available:hover {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .el-date-table td.current:not(.disabled) {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .el-date-table th,
+[data-theme="dark"] .el-date-table td {
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .el-picker-panel__header button {
+  color: #f9fafb !important;
+}
+
+/* 针对Element Plus下拉框的全局样式覆盖 - 终极解决方案 */
+[data-theme="dark"] {
+  .el-popper.is-pure {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .el-popper {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .el-select-dropdown {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .el-select-dropdown__item {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    
+    &:hover {
+      background-color: #374151 !important;
+      color: #f9fafb !important;
+    }
+    
+    &.selected {
+      background-color: #4b5563 !important;
+      color: #f9fafb !important;
+    }
+  }
+}
+
+/* 最高优先级的深色主题下拉框样式 */
+html[data-theme="dark"] .el-select-dropdown,
+html[data-theme="dark"] .el-popper,
+body[data-theme="dark"] .el-select-dropdown,
+body[data-theme="dark"] .el-popper {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+/* 使用CSS变量的终极方案 */
+:root[data-theme="dark"] {
+  .el-select-dropdown {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+    border: 1px solid #374151 !important;
+  }
+  
+  .el-select-dropdown__item {
+    background: #1f2937 !important;
+    color: #f9fafb !important;
+    border: none !important;
+    
+    &:hover {
+      background: #374151 !important;
+      color: #f9fafb !important;
+    }
+    
+    &.selected {
+      background: #4b5563 !important;
+      color: #f9fafb !important;
+    }
+  }
+  
+  .el-popper {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+    border: 1px solid #374151 !important;
+  }
+  
+  .el-popper.is-pure {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+    border: 1px solid #374151 !important;
+  }
+}
+
+/* 最强制的深色主题下拉框样式 - 覆盖所有可能的白色样式 */
+[data-theme="dark"] .el-select-dropdown,
+[data-theme="dark"] .el-select-dropdown__wrap,
+[data-theme="dark"] .el-scrollbar,
+[data-theme="dark"] .el-scrollbar__wrap,
+[data-theme="dark"] .el-scrollbar__view {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 内部文字元素保持透明背景 */
+[data-theme="dark"] .el-select-dropdown__item *,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item * {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item:hover,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item:hover {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+/* 悬停状态下内部文字元素保持透明 */
+[data-theme="dark"] .el-select-dropdown__item:hover *,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item:hover * {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item.selected,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item.selected {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* 选中状态下内部文字元素保持透明 */
+[data-theme="dark"] .el-select-dropdown__item.selected *,
+[data-theme="dark"] .el-select-dropdown .el-select-dropdown__item.selected * {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+/* 强制覆盖所有可能的文字颜色样式 */
+[data-theme="dark"] .el-select-dropdown__item span,
+[data-theme="dark"] .el-select-dropdown__item .el-select-dropdown__item-text,
+[data-theme="dark"] .el-select-dropdown__item * {
+  color: #f9fafb !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item:hover span,
+[data-theme="dark"] .el-select-dropdown__item:hover .el-select-dropdown__item-text,
+[data-theme="dark"] .el-select-dropdown__item:hover * {
+  color: #f9fafb !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item.selected span,
+[data-theme="dark"] .el-select-dropdown__item.selected .el-select-dropdown__item-text,
+[data-theme="dark"] .el-select-dropdown__item.selected * {
+  color: #f9fafb !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 深色主题下Element Plus下拉框箭头颜色修复 */
+[data-theme="dark"] .el-select .el-select__caret,
+[data-theme="dark"] .el-select .el-select__suffix,
+[data-theme="dark"] .el-select .el-select__suffix .el-icon,
+[data-theme="dark"] .el-select .el-icon,
+[data-theme="dark"] .el-select__wrapper .el-select__caret,
+[data-theme="dark"] .el-select__wrapper .el-select__suffix,
+[data-theme="dark"] .el-select__wrapper .el-select__suffix .el-icon,
+[data-theme="dark"] .el-select__wrapper .el-icon {
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .el-select:hover .el-select__caret,
+[data-theme="dark"] .el-select:hover .el-select__suffix,
+[data-theme="dark"] .el-select:hover .el-select__suffix .el-icon,
+[data-theme="dark"] .el-select__wrapper:hover .el-select__caret,
+[data-theme="dark"] .el-select__wrapper:hover .el-select__suffix,
+[data-theme="dark"] .el-select__wrapper:hover .el-select__suffix .el-icon {
+  color: #d1d5db !important;
+}
+
+/* 强制覆盖可能的白色箭头样式 */
+[data-theme="dark"] .form-control .el-select__caret,
+[data-theme="dark"] .form-control .el-select__suffix,
+[data-theme="dark"] .form-control .el-select__suffix .el-icon,
+[data-theme="dark"] .form-control .el-icon {
+  color: #9ca3af !important;
+  fill: #9ca3af !important;
+}
+
+[data-theme="dark"] .form-control:hover .el-select__caret,
+[data-theme="dark"] .form-control:hover .el-select__suffix,
+[data-theme="dark"] .form-control:hover .el-select__suffix .el-icon {
+  color: #d1d5db !important;
+  fill: #d1d5db !important;
+}
+
+/* 深色主题下Element Plus弹出框指向箭头修复 */
+[data-theme="dark"] .el-popper[data-popper-placement] .el-popper__arrow,
+[data-theme="dark"] .el-popper .el-popper__arrow {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .el-popper[data-popper-placement] .el-popper__arrow::before,
+[data-theme="dark"] .el-popper .el-popper__arrow::before {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .el-popper[data-popper-placement] .el-popper__arrow::after,
+[data-theme="dark"] .el-popper .el-popper__arrow::after {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* 针对select下拉框的弹出箭头 */
+[data-theme="dark"] .el-select-dropdown .el-popper__arrow,
+[data-theme="dark"] .el-select-dropdown .el-popper__arrow::before,
+[data-theme="dark"] .el-select-dropdown .el-popper__arrow::after {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* 针对日期选择器的弹出箭头 */
+[data-theme="dark"] .el-picker-panel .el-popper__arrow,
+[data-theme="dark"] .el-picker-panel .el-popper__arrow::before,
+[data-theme="dark"] .el-picker-panel .el-popper__arrow::after {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* 最高权重的箭头修复 */
+html[data-theme="dark"] .el-popper__arrow,
+html[data-theme="dark"] .el-popper__arrow::before,
+html[data-theme="dark"] .el-popper__arrow::after {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  border-top-color: #374151 !important;
+  border-bottom-color: #374151 !important;
+  border-left-color: #374151 !important;
+  border-right-color: #374151 !important;
+}
+
+/* 处理滚动条和其他可能的白色元素 */
+[data-theme="dark"] .el-popper,
+[data-theme="dark"] .el-popper.is-pure,
+[data-theme="dark"] .el-popper[data-popper-placement] {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 确保没有任何白色边框或背景 */
+[data-theme="dark"] .el-select-dropdown::before,
+[data-theme="dark"] .el-select-dropdown::after,
+[data-theme="dark"] .el-popper::before,
+[data-theme="dark"] .el-popper::after {
+  display: none !important;
+}
+
+/* 处理可能的内部包装元素 */
+[data-theme="dark"] .el-select-dropdown > *,
+[data-theme="dark"] .el-popper > * {
+  background-color: transparent !important;
+}
+
+/* 终极文字颜色覆盖 - 确保所有文字都是白色 */
+[data-theme="dark"] .el-select-dropdown,
+[data-theme="dark"] .el-select-dropdown *,
+[data-theme="dark"] .el-popper,
+[data-theme="dark"] .el-popper * {
+  color: #f9fafb !important;
+}
+
+/* 对于所有可能的文本元素进行强制覆盖 */
+[data-theme="dark"] .el-select-dropdown__item,
+[data-theme="dark"] .el-select-dropdown__item *,
+[data-theme="dark"] .el-option,
+[data-theme="dark"] .el-option * {
+  color: #f9fafb !important;
+  text-shadow: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 确保悬停和选中状态下文字也是白色，但没有背景 */
+[data-theme="dark"] .el-select-dropdown__item:hover,
+[data-theme="dark"] .el-select-dropdown__item:hover *,
+[data-theme="dark"] .el-select-dropdown__item.selected,
+[data-theme="dark"] .el-select-dropdown__item.selected * {
+  color: #f9fafb !important;
+  text-shadow: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 原生 select 元素的 option 样式修复 - 支持主题切换 */
+/* 浅色主题下的原生 select */
+[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* 深色主题下的原生 select */
+[data-theme="dark"] select {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border: 1px solid #374151 !important;
+}
+
+[data-theme="dark"] select option {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+/* 原生 date input 的主题支持 */
+[data-theme="dark"] input[type="date"] {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* 确保 date input 的下拉日历也遵循主题 */
+[data-theme="dark"] input[type="date"]::-webkit-datetime-edit {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  background-color: transparent !important;
+}
+
+/* 使用属性选择器进行更强制的覆盖 */
+*[class="form-control"] option,
+*[id*="filter"] option,
+select[class*="form"] option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* Firefox 特殊处理 */
+@-moz-document url-prefix() {
+  select option {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+  }
+}
+
+/* WebKit 浏览器（Chrome, Safari）特殊处理 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  select option {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+  }
+}
+
+/* 深色主题下的原生select */
+[data-theme="dark"] select {
+  background-color: #2d3748 !important;
+  color: #f7fafc !important;
+  border-color: #4a5568 !important;
+}
+
+[data-theme="dark"] select option {
+  background-color: #2d3748 !important;
+  color: #f7fafc !important;
+}
+
+/* 深色主题的特殊处理 */
+[data-theme="dark"] *[class="form-control"] option,
+[data-theme="dark"] *[id*="filter"] option {
+  background-color: #2d3748 !important;
+  color: #f7fafc !important;
+}
+
+// 强制下拉框样式 - 确保主题切换时正确显示
+[data-theme="light"] {
+  select,
+  select option {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #d1d5db !important;
+  }
+  
+  // Element Plus 下拉框强制修复
+  .el-select__wrapper {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #d1d5db !important;
+  }
+}
+
+// 深色主题下拉框强制修复
+[data-theme="dark"] {
+  select {
+    background-color: #2d3748 !important;
+    color: #f7fafc !important;
+    border-color: #4a5568 !important;
+  }
+  
+  // Element Plus 下拉框强制修复
+  .el-select__wrapper {
+    background-color: #2d3748 !important;
+    color: #f7fafc !important;
+    border-color: #4a5568 !important;
+  }
+}
+
+// 退而求其次方案：所有下拉选项永远保持白色背景
+// 不分主题，所有下拉选项都使用白色背景和深色文字
+select option,
+.el-select-dropdown__item,
+.el-option,
+.el-popper .el-select-dropdown__item,
+.el-select-dropdown .el-select-dropdown__item {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  
+  &:hover {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+  }
+  
+  &:focus {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+  }
+  
+  &.selected {
+    background-color: #e5e7eb !important;
+    color: #1f2937 !important;
+  }
+}
+
+// 下拉框容器也强制白色背景
+.el-popper,
+.el-select-dropdown,
+.el-popper[data-popper-placement] {
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+// 全局兜底规则 - 浅色主题
+html:not([data-theme="dark"]) {
+  select,
+  select option {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #d1d5db !important;
+  }
+  
+  .el-select__wrapper {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+  }
+}
+
+// 全局兜底规则 - 深色主题
+html[data-theme="dark"] {
+  select {
+    background-color: #2d3748 !important;
+    color: #f7fafc !important;
+    border-color: #4a5568 !important;
+  }
+  
+  .el-select__wrapper {
+    background-color: #2d3748 !important;
+    color: #f7fafc !important;
+  }
+}
+
+// 最强力的下拉选项白色背景强制规则
+// 使用更高优先级的选择器来覆盖所有可能的样式
+html * select option,
+html * .el-select-dropdown__item,
+html * .el-option,
+html * .el-popper .el-select-dropdown__item,
+html * .el-select-dropdown .el-select-dropdown__item,
+html * [role="option"] {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+// 特别针对Element Plus下拉框的强制修复
+html[data-theme] .el-select-dropdown__item,
+html[data-theme="light"] .el-select-dropdown__item,
+html[data-theme="dark"] .el-select-dropdown__item,
+html .el-select-dropdown__item,
+body .el-select-dropdown__item,
+* .el-select-dropdown__item {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+// 最强力的全局覆盖
+*[class*="el-select-dropdown"] *,
+*[class*="el-option"] *,
+*[class*="dropdown"] option,
+*[role="listbox"] *[role="option"] {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+// 专门针对悬停和聚焦状态的强制覆盖
+html * .el-select-dropdown__item:hover,
+html * .el-option:hover,
+html * select option:hover {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+html * .el-select-dropdown__item:focus,
+html * .el-option:focus,
+html * select option:focus {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+// 使用内联样式级别的优先级
+.el-select-dropdown__item[style],
+.el-option[style],
+select option[style] {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+

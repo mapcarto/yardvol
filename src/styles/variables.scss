@@ -1,0 +1,116 @@
+// 主题色彩 - 与原型保持一致
+:root {
+  // 主色调
+  --primary-color: #667eea;
+  --primary-color-hover: #5a6fd8;
+  --primary-color-active: #4c63d2;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  // 辅助色
+  --secondary-color: #f093fb;
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  
+  // 成功色
+  --success-color: #4facfe;
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  
+  // 警告色
+  --warning-color: #ffecd2;
+  --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  
+  // 危险色
+  --danger-color: #ff9a9e;
+  --danger-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  
+  // 深色背景
+  --dark-bg: #1a1d29;
+  
+  // 浅色主题背景
+  --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --bg-color-secondary: #f9fafb;
+  --card-bg: #ffffff;
+  
+  // 文字色
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --text-light: #a0aec0;
+  
+  // 边框色
+  --border-color: #e2e8f0;
+  --border-color-light: #f1f5f9;
+  
+  // 阴影 - 与原型一致
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
+  
+  // 任务进度颜色
+  --task-3d-color: #22c55e;
+  --task-pile-color: #a855f7;
+  --task-clear-color: #ef4444;
+  --task-volume-color: #3b82f6;
+}
+
+// 深色主题 - 完全匹配原型
+[data-theme="dark"] {
+  --card-bg: #2d3748;
+  --text-primary: #f7fafc;
+  --text-secondary: #a0aec0;
+  --border-color: #4a5568;
+  --bg-color: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  --bg-color-secondary: #1a202c;
+  
+  // 表单控件专用变量
+  --form-bg: #2d3748;
+  --form-text: #f7fafc;
+  --form-border: #4a5568;
+  --form-border-focus: #667eea;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.3);
+}
+
+// 浅色主题 - 显式定义所有变量
+[data-theme="light"] {
+  --card-bg: #ffffff;
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --text-light: #a0aec0;
+  --border-color: #e2e8f0;
+  --border-color-light: #f1f5f9;
+  --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --bg-color-secondary: #f9fafb;
+  
+  // 表单控件专用变量
+  --form-bg: #ffffff;
+  --form-text: #1f2937;
+  --form-border: #d1d5db;
+  --form-border-focus: #667eea;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
+}
+
+// 深色主题下的导航栏样式
+[data-theme="dark"] .sidebar {
+  background: linear-gradient(135deg, #1a1d29 0%, #2d3748 100%) !important;
+  color: #f7fafc !important;
+  border-right: 1px solid #4a5568 !important;
+}
+
+[data-theme="dark"] .header {
+  background: #2d3748 !important;
+  border-bottom: 1px solid #4a5568 !important;
+}
+
+// 响应式断点
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;

@@ -1,0 +1,151 @@
+/* CSS Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* 根据主题设置背景 */
+[data-theme="light"] body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+#root, #__next, #app {
+  isolation: isolate;
+  min-height: 100vh;
+}
+
+/* 移除默认的outline */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* 链接默认样式重置 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 列表默认样式重置 */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 表格默认样式重置 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 表单元素默认样式重置 - 保留必要的原生样式 */
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* 不要过度重置select和input的背景和边框 */
+select {
+  appearance: none;
+  background-color: var(--form-bg, #ffffff);
+  color: var(--form-text, #1f2937);
+  border: 1px solid var(--form-border, #d1d5db);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+input[type="text"],
+input[type="email"], 
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="url"],
+input[type="search"] {
+  appearance: none;
+  background-color: var(--form-bg, #ffffff);
+  color: var(--form-text, #1f2937);
+  border: 1px solid var(--form-border, #d1d5db);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+textarea {
+  appearance: none;
+  background-color: var(--form-bg, #ffffff);
+  color: var(--form-text, #1f2937);
+  border: 1px solid var(--form-border, #d1d5db);
+  padding: 0.5rem;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+/* 移除按钮默认样式 */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 移除checkbox和radio默认样式 */
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
