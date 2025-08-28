@@ -562,44 +562,25 @@ const closeOverviewModal = () => {
   showOverviewModal.value = false
 }
 
-// 命名规范检查函数
-const validateDataNaming = (filename: string) => {
-  // 命名规范：堆场名称-时间(格式YYYY-MM-DD)-第次(格式01,02...)
-  const namingPattern = /^[\u4e00-\u9fa5A-Za-z0-9]+\d*[\u53f7]*[\u5806\u573a]*-\d{4}-\d{2}-\d{2}-\d{2}$/
-  return namingPattern.test(filename)
-}
-
-// 提取命名信息的函数
-const parseDataName = (filename: string) => {
-  const parts = filename.split('-')
-  if (parts.length >= 4) {
-    const yardName = parts[0]
-    const date = `${parts[1]}-${parts[2]}-${parts[3]}`
-    const sequence = parts[4] || '01'
-    return { yardName, date, sequence, isValid: true }
-  }
-  return { isValid: false }
-}
-
-const getImageActionClass = (status) => {
+const getImageActionClass = (status: string | undefined) => {
   if (status === 'processing') return 'action-btn-processing';
   if (status === 'completed') return 'action-btn-completed custom-purple';
   return 'action-btn-process custom-green';
 };
 
-const getImageActionIcon = (status) => {
+const getImageActionIcon = (status: string | undefined) => {
   if (status === 'processing') return 'fas fa-spinner fa-spin';
   if (status === 'completed') return 'fas fa-cube';
   return 'fas fa-cogs';
 };
 
-const getImageActionText = (status) => {
+const getImageActionText = (status: string | undefined) => {
   if (status === 'processing') return '处理中';
   if (status === 'completed') return '3D';
   return '处理';
 };
 
-const handleImageAction = (item) => {
+const handleImageAction = (item: any) => {
   if (item.status === 'pending') {
     // 更新状态为处理中
     item.status = 'processing';

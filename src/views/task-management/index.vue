@@ -601,6 +601,7 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const jumpToPage = ref<number | string>('')
 
+
 // 筛选表单
 const filterForm = reactive({
   type: 'all',
@@ -804,8 +805,7 @@ const getRecommendedDataSources = () => {
     return []
   }
   
-  const { type, yard, date, sequence } = createForm
-  const baseName = `${yard}-${date}-${sequence}`
+  const { type, yard, date } = createForm
   
   // 模拟已上传的数据源（实际应该从数据管理API获取）
   const existingDataSources = [
@@ -839,7 +839,6 @@ const getRecommendedDataSources = () => {
     
     // 检查日期是否匹配（允许选择历史数据）
     const dataDate = data.value.split('-')[2]
-    const dataSequence = data.value.split('-')[3]
     return dataDate <= date
   })
   
@@ -980,16 +979,6 @@ const getStepClass = (step: string, task: any, index: number) => {
   }
   
   return classes.join(' ')
-}
-
-const getProgressStepColor = (step: string) => {
-  const colorMap: Record<string, string> = {
-    '3d': '#22c55e',      // 三维重建 - 绿色
-    'pile': '#a855f7',    // 分堆 - 紫色
-    'clear': '#ef4444',   // 清表 - 红色
-    'volume': '#3b82f6'   // 体积计算 - 蓝色
-  }
-  return colorMap[step] || '#6b7280'
 }
 
 const getTypeLabel = (type: string) => {
@@ -1164,27 +1153,7 @@ const retryTask = (task: any) => {
   ElMessage.success(`任务 ${task.name} 已重新启动`)
 }
 
-const cancelTask = (task: any) => {
-  ElMessageBox.confirm(
-    `确定要取消任务 "${task.name}" 吗？`,
-    '取消确认',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    task.status = 'canceled'
-    ElMessage.success('任务已取消')
-  }).catch(() => {
-    ElMessage.info('已取消操作')
-  })
-}
 
-const batchCancel = () => {
-  ElMessage.success(`批量取消 ${selectedTasks.value.length} 个任务`)
-  selectedTasks.value = []
-}
 
 const batchRetry = () => {
   ElMessage.success(`批量重试 ${selectedTasks.value.length} 个任务`)

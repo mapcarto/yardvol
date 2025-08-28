@@ -208,7 +208,7 @@ const quickLogin = (userType: string) => {
     viewer: { username: 'viewer', password: '123456' }
   }
   
-  const cred = credentials[userType]
+  const cred = credentials[userType as keyof typeof credentials]
   if (cred) {
     loginForm.value.username = cred.username
     loginForm.value.password = cred.password

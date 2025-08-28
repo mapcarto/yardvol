@@ -273,11 +273,6 @@ const handleStartCollection = () => {
   // 跳转到数据采集页面或启动采集流程
 }
 
-const handleUploadOverview = () => {
-  console.log('上传概览')
-  // 跳转到数据管理页面
-}
-
 // 初始化图表 - 完全按照原型样式
 const initVolumeChart = () => {
   if (!volumeChartRef.value) return

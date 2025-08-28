@@ -122,7 +122,7 @@
               v-if="page !== '...'" 
               class="pagination-button" 
               :class="{ active: currentPage === page }"
-              @click="goToPage(page)"
+              @click="goToPage(Number(page))"
             >
               {{ page }}
             </button>

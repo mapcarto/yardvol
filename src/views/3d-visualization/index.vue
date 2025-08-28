@@ -322,9 +322,7 @@ const modelLoaded = ref(false) // New ref to track if the model is loaded
 const showInfoPanel = ref(false)
 const showManualTools = ref(false)
 const selectedPile = ref<string | null>(null)
-const currentTool = ref('rotate')
 const currentCleanTool = ref('')
-const showPileList = ref(false)
 
 // Three.js 相关
 const threeContainer = ref<HTMLElement>()
@@ -559,7 +557,6 @@ const flattenOperation = () => {
   }
   
   const mesh = coalPileMeshes[selectedPile.value]
-  const geometry = mesh.geometry as THREE.ConeGeometry
   const originalHeight = 3 // 使用固定高度值
   
   // 创建动画效果，逐渐将煤堆压平
